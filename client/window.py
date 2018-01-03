@@ -13,7 +13,6 @@ class Window(threading.Thread):
         self.on_keypress = lambda x: None
         self.on_keyrelease = lambda x: None
         self.last_pressed = pygame.key.get_pressed()
-        self.draw = lambda x: None
         self.gamefield = None
 
     def update(self):
