@@ -8,7 +8,7 @@ class GameField:
         self.players = pygame.sprite.Group()
 
     def update(self, data):
-        pass
+        self.players.update(data)
 
     def draw(self, surface):
         surface.blit(self.surface, (0, 0))
