@@ -35,12 +35,7 @@ class Handler(WebSocketServerProtocol):
         self.sendMessage(data, isBinary=True)
 
     def get_information(self):
-        return {
-            'user': self.user,
-            'user_id': self.user_id,
-            'user_rights': self.user_rights,
-            'user_stat': self.user_stat
-        }
+        return self.temp.get_user_information(self.user)
 
     def onConnect(self, request):
         self.temp.handlers.append(self)
@@ -59,7 +54,7 @@ class Handler(WebSocketServerProtocol):
 
     def onMessage(self, payload, is_binary):
         try:
-            message = json.loads(payload.decode('utf-8'))
+            message = json.loads(gzip.decompress(payload).decode('utf-8'))
             message_type = message['type']
             data = message['data']
         except:
@@ -68,13 +63,11 @@ class Handler(WebSocketServerProtocol):
         try:
             message_type = message_type.replace('__', '')
             message_type = message_type.lower()
-            self.logger.info('%s Запрос %s  %s' % (self.addr, message_type, data))
             resp = commands.__getattribute__(message_type)(self, data)
         except Exception as ex:
             resp = {'type': message_type + '_error', 'data': str(ex)}
-            self.logger.error('%s Ошибка %s  %s' % (self.addr, message_type, str(ex)))
+            self.logger.error('%s Ошибка %s %s %s' % (self.addr, message_type, data, str(ex)))
         self.ws_send(json.dumps(resp))
-        self.logger.info('%s Ответ  %s  %s' % (self.addr, resp['type'], resp['data']))
 
     def onClose(self, *args):
         try:

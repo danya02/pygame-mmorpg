@@ -10,4 +10,3 @@ USERS = 'db/users.json'
 PORT = 8000
 IP = 'localhost'
 # ---------------------------- #
-
