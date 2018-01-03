@@ -3,10 +3,13 @@
 
 import websocket
 import json
+import gzip
+import threading
 
 
-class WSClient:
+class WSClient(threading.Thread):
     def __init__(self, url):
+        threading.Thread.__init__(self, target=self.run)
         self.url = url
         self.ws_connection = websocket.WebSocketApp(
             self.url,
@@ -15,9 +18,10 @@ class WSClient:
             on_close=self.on_close
         )
         self.ws_connection.keep_running = True
+        
 
     def on_message(self, _, data):
-        print(data)
+        print(gzip.decompress(data))
 
     def on_open(self, _):
         print('Start')
@@ -25,3 +29,5 @@ class WSClient:
     def on_close(self, _):
         self.ws_connection.keep_running = False
 
+    def run(self):
+        self.ws_connection.run_forever()

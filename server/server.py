@@ -9,6 +9,7 @@ import logging
 import asyncio
 import threading
 import traceback
+import gzip
 from db import Db
 
 lock = threading.Lock()
@@ -27,11 +28,11 @@ class Handler(WebSocketServerProtocol):
         self.user_rights = 0
         self.addr = None
         self.typing = False
-        self.channel.join(self)
         self.logger = logging.getLogger('WSServer')
 
     def ws_send(self, message):
-        self.sendMessage(message.encode('utf-8'), False)
+        data = gzip.compress(message.encode('utf-8'), compresslevel=9)
+        self.sendMessage(data, isBinary=True)
 
     def get_information(self):
         return {
@@ -54,6 +55,7 @@ class Handler(WebSocketServerProtocol):
                 'version': VERSION
             }
         }))
+        self.channel.join(self)
 
     def onMessage(self, payload, is_binary):
         try:
