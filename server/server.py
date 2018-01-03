@@ -5,12 +5,11 @@ from autobahn.asyncio.websocket import WebSocketServerProtocol, \
 import json
 import commands
 from config import *
-from db import Db
 import logging
 import asyncio
 import threading
 import traceback
-
+from db import Db
 
 lock = threading.Lock()
 db = Db(lock)
@@ -76,11 +75,14 @@ class Handler(WebSocketServerProtocol):
         self.logger.info('%s Ответ  %s  %s' % (self.addr, resp['type'], resp['data']))
 
     def onClose(self, *args):
-        commands.leave(self, None)
-        if self.channel:
-            self.channel.leave(self)
-        self.temp.handlers.remove(self)
-        self.logger.info('%s Отключился' % (self.addr,))
+        try:
+            commands.leave(self, None)
+            if self.channel:
+                self.channel.leave(self)
+            self.temp.handlers.remove(self)
+            self.logger.info('%s Отключился' % (self.addr,))
+        except:
+            pass
 
 
 class Thread(threading.Thread):
