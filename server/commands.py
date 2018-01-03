@@ -5,11 +5,9 @@
 
 import json
 import time
-
+import game.actions
 import sessions
 from config import *
-from channel import Channel
-from server import Thread
 
 
 def perms_check(user_rights):
@@ -170,6 +168,13 @@ def send_message(self, data):
     }
     self.channel.send(resp)
     return {'type': 'send_ok', 'data': ''}
+
+
+@perms_check(1)
+def action(self, data):
+    action_type = data['action_type'].replace('__', '')
+    resp = game.actions.__getattribute__(action_type)(self, data)
+    return {'type': 'action_%s_ok' % action_type, 'data': resp}
 
 
 @perms_check(0)
