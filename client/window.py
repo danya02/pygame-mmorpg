@@ -16,6 +16,7 @@ class Window(threading.Thread):
         self.gamefield = None
 
     def update(self):
+        self.display.fill(pygame.Color('black'))
         if self.gamefield is not None:
             self.gamefield.draw(self.display)
         pygame.display.flip()

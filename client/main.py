@@ -20,7 +20,6 @@ if __name__ == '__main__':
     frame.start()
     while 1:
         frame.gamefield.update(
-            {'players': [{'id': 'CHARA', 'x': abs(int(math.sin(time.time()) * 400)), 'y': abs(int(math.sin(time.time())*400))}],
+            {'players': [{'id': 'CHARA', 'x': 400+(int(math.sin(time.time()) * 300)), 'y': 300+(int(math.cos(time.time())*250))}],
              'npcs': [], 'entities': []})
         frame.update()
-        time.sleep(0.05)
