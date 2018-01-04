@@ -5,6 +5,7 @@ import pygame
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        self.id = None
         self.image = pygame.Surface((1, 1))
         self.rect = self.image.get_rect()
         self.direction = 2
@@ -15,7 +16,16 @@ class Player(pygame.sprite.Sprite):
         self.walking = False
 
     def update(self, data):
-        self.direction = 2
+        mydata = None
+        for i in data:
+            if i['id'] == self.id:
+                mydata = data.pop(i)
+                break
+        self.rect.centerx = mydata['x']
+        self.rect.centery = mydata['y']
+        return mydata
+
+    def update_image(self):
         if self.walking:
             self.walk_phase += 1
         if self.walk_phase >= len(self.sprites[self.direction]):
