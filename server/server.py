@@ -32,7 +32,7 @@ class Handler(WebSocketServerProtocol):
         self.logger = logging.getLogger('WSServer')
 
     def ws_send(self, message):
-        data = gzip.compress(message.encode('utf-8'), compresslevel=9)
+        data = gzip.compress(message.encode('utf-8'))
         self.sendMessage(data, isBinary=True)
 
     def get_information(self):
@@ -134,5 +134,7 @@ if __name__ == '__main__':
             out = eval(input())
             if out is not None:
                 print(out)
+        except KeyboardInterrupt:
+            exit()
         except:
             traceback.print_exc()

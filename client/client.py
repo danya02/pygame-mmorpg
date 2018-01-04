@@ -6,7 +6,7 @@ import gzip
 import threading
 import json
 import client_commands
-# import time
+import time
 
 
 class WSClient(threading.Thread):
@@ -32,12 +32,14 @@ class WSClient(threading.Thread):
         self.ws_connection.send(gzip.compress(data.encode('utf-8')), 2)
 
     def on_message(self, _, data):
-        # TODO: Debug
         data = gzip.decompress(data)
-        data = json.loads(data)
+        data = json.loads(data.decode('utf-8'))
         message_type = data['type']
         data = data['data']
-        client_commands.__getattribute__(message_type)(self, data)
+        try:
+            client_commands.__getattribute__(message_type)(self, data)
+        except:
+            pass
 
     def on_close(self, _):
         self.ws_connection.keep_running = False
@@ -46,10 +48,10 @@ class WSClient(threading.Thread):
         self.ws_connection.run_forever()
 
 
-# ws = WSClient('ws://localhost:8000')
-# ws.start()
-# time.sleep(2)
-# t = time.time()
-# for _ in range(1000):
-#     ws.send_message({"type": "count", "data": ""})
-# print('Finish' + str(time.time() - t))
+ws = WSClient('ws://92.63.105.60:8000')
+ws.start()
+time.sleep(2)
+t = time.time()
+for _ in range(1000):
+    ws.send_message({"type": "count", "data": ""})
+print('Finish' + str(time.time() - t))

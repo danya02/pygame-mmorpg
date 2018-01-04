@@ -1,5 +1,8 @@
-from game.models import NPC
+from game.models import *
 from game.config import *
+from game.effects import *
+from game.items import *
+from game.entities import *
 import pygame
 from pygame import Rect
 
@@ -68,21 +71,33 @@ class Field:
         self.npc = []
         self.entities = []
 
+        self.tick = 0
+
         self.width, self.height = FIELD_WIDTH, FIELD_HEIGHT
         self.rect = Rect(0, 0, self.width, self.height)
 
-    def tick(self):
+    def do_tick(self):
         for player in self.players:
             player.update()
         for npc in self.npc:
             npc.update()
         for entity in self.entities:
             entity.update()
+        self.tick += 1
 
     def add_player(self, x, y, hp, user):
         player = Player(x, y, hp, self, user)
-        self.objects.append(player)
         self.players.append(player)
+
+    # TODO: add_entity
+
+    @staticmethod
+    def add_effect(effect):
+        npc = effect.npc
+        for eff in npc.effects:
+            if eff.id == effect.id:
+                npc.effects.remove(eff)
+        npc.effects.append(effect)
 
 
 class Game:

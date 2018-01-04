@@ -221,6 +221,7 @@ def count(self, _):
     if self.count == 999:
         print(time.time() - self.t)
     self.count += 1
+    return {"type": "count_ok", "data": None}
 
 
 def error(*_):

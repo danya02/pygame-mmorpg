@@ -1,11 +1,13 @@
+from pygame import Rect
 
 
 class Object:
+    id = '0'
+
     def __init__(self, rect, field):
         self.rect = rect
         self.field = field
         self.collide = True
-        self.id = '0'
 
         self.speed_x, self.speed_y = 0, 0
         self.moving = False
@@ -25,8 +27,10 @@ class Object:
             self.rect = move_y
 
     def check_collide(self, rect):
+        objects = self.field.objects + self.field.players + self.field.npc + self.field.entities
+        objects.remove(self)
         if self.field.rect.contains(rect) \
-                or (rect.collidelist(list(filter(lambda x: x.collide, self.field.objects))) == -1):
+                and((rect.collidelist(list(filter(lambda x: x.collide, objects))) == -1) or not self.collide):
             return False
         return True
 
@@ -42,34 +46,69 @@ class Object:
 
 
 class Entities(Object):
+    id = '150'
+
     def __init__(self, rect, field):
         super(Entities, self).__init__(rect, field)
         self.collide = False
         self.touchable = True
 
+    def update(self):
+        super(Entities, self).update()
+        if self.touchable:
+            pass
+            # TODO: touch event
+
 
 class Item(Entities):
+    id = '50'
+
     def __init__(self, rect, field):
         super(Item, self).__init__(rect, field)
         self.dropped = False
         self.name = None
 
+        self.action_delay = 15
+        self.last_action_tick = 0
+
+    def action(self, player):
+        if self.field.tick - self.last_action_tick < self.action_delay:
+            return
+        self.last_action_tick = self.field.tick
+
+        # Override your action
+
 
 class Weapon(Item):
-    def __init__(self, rect, field):
-        super(Weapon, self).__init__(rect, field)
+    def __init__(self, field):
+        self.width = 10
+        self.height = 15
+
+        super(Weapon, self).__init__(Rect(0, 0, self.width, self.height), field)
         self.damage_value = 0
+        self.damage_radius = 20
 
     def damage(self, npc):
         npc.hp -= self.damage_value
 
 
 class Effect:
-    def __init__(self, player):
+    id = '100'
+
+    def __init__(self, player, ticks, delay):
         self.player = player
-        self.id = '0'
+        self.ticks = ticks
+        self.delay = delay
 
     def update(self):
+        if self.ticks == 0:
+            self.player.effects.remove(self)
+            return
+        if not self.ticks % self.delay:
+            self.action()
+        self.ticks -= 1
+
+    def action(self):
         pass
 
 
