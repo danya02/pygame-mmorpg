@@ -11,6 +11,7 @@ import threading
 import traceback
 import gzip
 from db import Db
+import game.actions
 
 lock = threading.Lock()
 db = Db(lock)
@@ -19,10 +20,10 @@ db = Db(lock)
 class Handler(WebSocketServerProtocol):
     def __init__(self):
         WebSocketServerProtocol.__init__(self)
+        self.count = 0
         self.temp = db
         self.user = None
         self.user_id = None
-        self.user_stat = {}
         self.game = None
         self.channel = self.temp.main_channel
         self.user_rights = 0
@@ -35,12 +36,16 @@ class Handler(WebSocketServerProtocol):
         self.sendMessage(data, isBinary=True)
 
     def get_information(self):
-        return self.temp.get_user_information(self.user)
+        return {
+            'user': self.user,
+            'user_id': self.user_id,
+            'user_rights': self.user_rights,
+        }
 
     def onConnect(self, request):
         self.temp.handlers.append(self)
         self.addr = request.peer[4:]
-        self.logger.info('%s Запрос на подключение' % self.addr)
+        self.logger.info('%s Connection' % self.addr)
 
     def onOpen(self):
         self.ws_send(json.dumps({
@@ -55,18 +60,30 @@ class Handler(WebSocketServerProtocol):
     def onMessage(self, payload, is_binary):
         try:
             message = json.loads(gzip.decompress(payload).decode('utf-8'))
-            message_type = message['type']
-            data = message['data']
         except:
-            message_type = 'error'
-            data = 'Error'
-        try:
+            message = commands.error(self, None)
+        if message.get('type') and not (message.get('data') is None):
+            message_type = message['type']
             message_type = message_type.replace('__', '')
             message_type = message_type.lower()
-            resp = commands.__getattribute__(message_type)(self, data)
-        except Exception as ex:
-            resp = {'type': message_type + '_error', 'data': str(ex)}
-            self.logger.error('%s Ошибка %s %s %s' % (self.addr, message_type, data, str(ex)))
+            data = message.get('data')
+            try:
+                resp = commands.__getattribute__(message_type)(self, data)
+            except Exception as ex:
+                resp = {'type': message_type + '_error', 'data': str(ex)}
+                self.logger.error('%s Error %s %s %s' % (self.addr, message_type, data, str(ex)))
+        elif message.get('action'):
+            action = message['action']
+            action = action.replace('__', '')
+            action = action.lower()
+            data = message.get('data')
+            try:
+                resp = game.actions.__getattribute__(action)(self, data)
+            except Exception as ex:
+                resp = {'type': action + '_error', 'data': str(ex)}
+                self.logger.error('%s Error %s %s %s' % (self.addr, action, data, str(ex)))
+        else:
+            resp = commands.error(None, None)
         self.ws_send(json.dumps(resp))
 
     def onClose(self, *args):
@@ -75,7 +92,7 @@ class Handler(WebSocketServerProtocol):
             if self.channel:
                 self.channel.leave(self)
             self.temp.handlers.remove(self)
-            self.logger.info('%s Отключился' % (self.addr,))
+            self.logger.info('%s Disconnect' % (self.addr,))
         except:
             pass
 
@@ -95,7 +112,7 @@ def run(secret_key):
     log_handler.setFormatter(logging.Formatter(form))
 
     logger.addHandler(log_handler)
-    logger.info('Запуск сервера %s:%s' % (IP, PORT))
+    logger.info('Start %s:%s' % (IP, PORT))
 
     Handler.secret_key = secret_key
     factory = WebSocketServerFactory(u"ws://%s:%s" % (IP, PORT))

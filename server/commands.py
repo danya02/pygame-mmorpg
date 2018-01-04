@@ -199,7 +199,7 @@ def get_channel_information(self, _):
 
 
 @perms_check(0)
-def leave(self, data):
+def leave(*_):
     pass
 
 
@@ -213,6 +213,14 @@ def ping(_, data):
     if not data:
         return {'type': 'pong', 'data': 'Pong!'}
     return {'type': 'pong', 'data': time.time() - data}
+
+
+def count(self, _):
+    if self.count == 0:
+        self.t = time.time()
+    if self.count == 999:
+        print(time.time() - self.t)
+    self.count += 1
 
 
 def error(*_):

@@ -1,13 +1,15 @@
 from game.models import NPC
 from game.config import *
+import pygame
 from pygame import Rect
 
 
 class Player(NPC):
     def __init__(self, x, y, hp, field, user):
-        super(Player, self).__init__(Rect(x, y, PLAYER_WIDTH, PLAYER_HEIGHT), field, '0', hp)
+        super(Player, self).__init__(Rect(x, y, PLAYER_WIDTH, PLAYER_HEIGHT), field, hp)
         self.name = user.user
         self.user = user
+        self.inventory = []
 
         self.speed_x = self.speed_y = 0
         self.direction = 0
@@ -15,16 +17,47 @@ class Player(NPC):
     def action(self, act):
         if act == 'left':
             self.speed_x = -1
-            self.direction = 2
+            self.direction = 3
         elif act == 'right':
             self.speed_x = 1
-            self.direction = 0
+            self.direction = 1
         elif act == 'up':
             self.speed_y = -1
-            self.direction = -1
+            self.direction = 0
         elif act == 'down':
             self.speed_y = 1
-            self.direction = 1
+            self.direction = 2
+
+    def drop_item(self, item):
+        """
+        :param item: id or class
+        :return: None
+        """
+        if type(item) == str:
+            item = self.canon_id(item)
+            for i in self.inventory:
+                if i.id == item:
+                    break
+            else:
+                return
+            self.drop_item(i)
+            return
+        super(Player, self).drop_item(item)
+        self.inventory.remove(item)
+
+    def get_item(self, item):
+        if type(item) == str:
+            item = self.canon_id(item)
+            for entity in self.field.entities:
+                if entity.id == item:
+                    break
+            else:
+                return
+            self.get_item(entity)
+            return
+        self.inventory.append(item)
+        self.field.entities.remove(item)
+        item.dropped = False
 
 
 class Field:
@@ -59,3 +92,10 @@ class Game:
 
     def add_player(self, user):
         self.field.add_player(user.player_info['x'], user.player_info['y'], user.player_info['hp'], user)
+
+    @staticmethod
+    def get_img(img):
+        return {
+                'src': str(pygame.image.tostring(img, 'RGBA')),
+                'size': img.get_size()
+        }
