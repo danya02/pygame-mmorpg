@@ -17,7 +17,7 @@ class Window(threading.Thread):
 
     def update(self):
         if self.gamefield is not None:
-            self.gamefield.draw(self)
+            self.gamefield.draw(self.display)
         pygame.display.flip()
 
     def run(self):

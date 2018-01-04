@@ -26,6 +26,7 @@ class GameField:
 
     def draw(self, surface):
         surface.blit(self.surface, (0, 0))
+        self.players.update()
         self.players.draw(surface)
 
     def send_from_player(self, data):

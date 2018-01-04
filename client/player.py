@@ -15,15 +15,18 @@ class Player(pygame.sprite.Sprite):
         self.pressed_keys = []
         self.walking = False
 
-    def update(self, data):
-        mydata = None
-        for i in data:
-            if i['id'] == self.id:
-                mydata = data.pop(i)
-                break
-        self.rect.centerx = mydata['x']
-        self.rect.centery = mydata['y']
-        return mydata
+    def update(self, data = None):
+        if data is None:
+            self.update_image()
+        else:
+            mydata = None
+            for i in data:
+                if i['id'] == self.id:
+                    mydata = data.pop(data.index(i))
+                    break
+            self.rect.centerx = mydata['x']
+            self.rect.centery = mydata['y']
+            return mydata
 
     def update_image(self):
         if self.walking:
