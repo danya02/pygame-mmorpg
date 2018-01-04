@@ -7,6 +7,7 @@ import pygame
 class Window(threading.Thread):
     def __init__(self):
         super().__init__()
+        self.name = 'Window thread'
         self.loop = True
         self.daemon = True
         self.display = pygame.display.set_mode((800, 600))
@@ -23,6 +24,7 @@ class Window(threading.Thread):
 
     def run(self):
         while self.loop:
+            self.update()
             for i in pygame.event.get():
                 if i.type == pygame.KEYDOWN:
                     self.on_keypress(i.key)

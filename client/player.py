@@ -14,19 +14,32 @@ class Player(pygame.sprite.Sprite):
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
         self.pressed_keys = []
         self.walking = False
+        self.standalone = False
 
     def update(self, data = None):
-        if data is None:
-            self.update_image()
+        if not self.standalone:
+            if data is None:
+                self.update_image()
+            else:
+                mydata = None
+                for i in data:
+                    if i['id'] == self.id:
+                        mydata = data.pop(data.index(i))
+                        break
+                self.rect.centerx = mydata['x']
+                self.rect.centery = mydata['y']
+                return mydata
         else:
-            mydata = None
-            for i in data:
-                if i['id'] == self.id:
-                    mydata = data.pop(data.index(i))
-                    break
-            self.rect.centerx = mydata['x']
-            self.rect.centery = mydata['y']
-            return mydata
+            if pygame.K_UP in self.pressed_keys:
+                self.rect.centery-=1
+            if pygame.K_DOWN in self.pressed_keys:
+                self.rect.centery+=1
+            if pygame.K_LEFT in self.pressed_keys:
+                self.rect.centerx-=1
+            if pygame.K_RIGHT in self.pressed_keys:
+                self.rect.centerx+=1
+            self.update_image()
+
 
     def update_image(self):
         if self.walking:
