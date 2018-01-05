@@ -15,7 +15,7 @@ class Entity(pygame.sprite.Sprite):
         self.walking = False
         self.standalone = False
 
-    def update(self, data=None):
+    def update(self, data=None, full=False):
         if data is None:
             self.update_image()
         else:
@@ -24,6 +24,9 @@ class Entity(pygame.sprite.Sprite):
                 if i['id'] == self.id:
                     mydata = data.pop(data.index(i))
                     break
+            if mydata is None and full:
+                self.kill()
+                return None
             self.rect.centerx = mydata['x']
             self.rect.centery = mydata['y']
             return mydata
@@ -60,9 +63,9 @@ class Player(Entity):
         self.sprites = [[pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))) for i in
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
 
-    def update(self, data=None):
+    def update(self, data=None, full=False):
         if not self.standalone:
-            super().update(data)
+            super().update(data, full)
         else:
             if pygame.K_UP in self.pressed_keys:
                 self.rect.centery -= 1
