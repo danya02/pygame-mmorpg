@@ -2,7 +2,7 @@
 import pygame
 
 
-class Player(pygame.sprite.Sprite):
+class Entity(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.id = None
@@ -10,36 +10,23 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.direction = 2
         self.walk_phase = 0
-        self.sprites = [[pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))) for i in
-                         range(2 if j in 'lr' else 4)] for j in 'urdl']
+        self.sprites = [[pygame.Surface((1, 1))]] * 4
         self.pressed_keys = []
         self.walking = False
         self.standalone = False
 
-    def update(self, data = None):
-        if not self.standalone:
-            if data is None:
-                self.update_image()
-            else:
-                mydata = None
-                for i in data:
-                    if i['id'] == self.id:
-                        mydata = data.pop(data.index(i))
-                        break
-                self.rect.centerx = mydata['x']
-                self.rect.centery = mydata['y']
-                return mydata
-        else:
-            if pygame.K_UP in self.pressed_keys:
-                self.rect.centery-=1
-            if pygame.K_DOWN in self.pressed_keys:
-                self.rect.centery+=1
-            if pygame.K_LEFT in self.pressed_keys:
-                self.rect.centerx-=1
-            if pygame.K_RIGHT in self.pressed_keys:
-                self.rect.centerx+=1
+    def update(self, data=None):
+        if data is None:
             self.update_image()
-
+        else:
+            mydata = None
+            for i in data:
+                if i['id'] == self.id:
+                    mydata = data.pop(data.index(i))
+                    break
+            self.rect.centerx = mydata['x']
+            self.rect.centery = mydata['y']
+            return mydata
 
     def update_image(self):
         if self.walking:
@@ -60,6 +47,32 @@ class Player(pygame.sprite.Sprite):
         self.walking = walk
         if not self.walking:
             self.walk_phase = 0
+
+
+class NPC(Entity):
+    def __init__(self):
+        super().__init__()
+
+
+class Player(Entity):
+    def __init__(self):
+        super().__init__()
+        self.sprites = [[pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))) for i in
+                         range(2 if j in 'lr' else 4)] for j in 'urdl']
+
+    def update(self, data=None):
+        if not self.standalone:
+            super().update(data)
+        else:
+            if pygame.K_UP in self.pressed_keys:
+                self.rect.centery -= 1
+            if pygame.K_DOWN in self.pressed_keys:
+                self.rect.centery += 1
+            if pygame.K_LEFT in self.pressed_keys:
+                self.rect.centerx -= 1
+            if pygame.K_RIGHT in self.pressed_keys:
+                self.rect.centerx += 1
+            self.update_image()
 
     def on_keypress(self, key):
         self.pressed_keys.append(key)

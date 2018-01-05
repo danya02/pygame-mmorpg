@@ -7,13 +7,13 @@ import time
 sys.path.append('.')
 import window
 import gamefield
-import player
+import entity
 
 if __name__ == '__main__':
     frame = window.Window()
     frame.gamefield = gamefield.GameField()
 
-    chara = player.Player()
+    chara = entity.Player()
     chara.id = 'CHARA'
     chara.standalone = True
     frame.on_keypress = chara.on_keypress
