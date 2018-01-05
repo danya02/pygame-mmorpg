@@ -42,7 +42,7 @@ def __auth(self, user, session=None, auth_type='auth_ok'):
     self.user = user
     self.user_id = self.temp.users[user]['user_id']
     self.user_rights = self.temp.users[user]['user_rights']
-    self.user_stat = self.temp.users[user]['user_stat']
+    self.player_info = self.temp.users[user]['player_info']
     for handler in self.temp.handlers:
         hand_user = handler.user
         if (hand_user == self.user) and (handler is not self):
@@ -124,6 +124,14 @@ def reg(self, data):
             'password': data["password"],
             'user_rights': 1,
             'user_id': self.user_id,
+            'player_info': {
+                'inventory': [],
+                'effects': [],
+                'hp': 100,
+                'x': 100,
+                'y': 100,
+                'active_item': None,
+            }
         }
         self.temp.db_save(USERS, self.temp.users)
         return __auth(self, data['user'], auth_type='reg_ok')

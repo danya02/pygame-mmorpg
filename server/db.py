@@ -40,6 +40,7 @@ class Db:
             'user': user,
             'user_rights': user['user_rights'],
             'user_id': user['user_id'],
+            'player_info': user['player_info'],
         }
 
     def get_user_id_information(self, user_id):
