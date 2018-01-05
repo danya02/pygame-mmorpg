@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pygame
+import random
 
 import entity
 
@@ -13,7 +14,31 @@ class GameField:
         self.send_message = lambda x: None
 
     def load(self, data):
-        pass  # TODO: create players, bg, &c.
+        if data['bg']:
+            self.surface = pygame.Surface((800, 600))  # TODO: generate from data
+            for i in range(800):
+                for j in range(600):
+                    self.surface.set_at((i, j), pygame.Color(random.randint(0, 255), random.randint(0, 255),
+                                                             random.randint(0, 255), 255))
+        if len(data['players']) != 0:
+            for i in data['players']:
+                p = entity.Player()  # TODO: create from data
+                p.id = i['id']
+                p.rect.centerx = i['x']
+                p.rect.centery = i['y']
+                self.players.add(p)
+            if len(data['entities']) != 0:
+                p = entity.Entity()  # TODO: create from data
+                p.id = i['id']
+                p.rect.centerx = i['x']
+                p.rect.centery = i['y']
+                self.entities.add(p)
+            if len(data['npcs']) != 0:
+                p = entity.NPC()  # TODO: create from data
+                p.id = i['id']
+                p.rect.centerx = i['x']
+                p.rect.centery = i['y']
+                self.npcs.add(p)
 
     def update(self, data):
         self.players.update(data['players'], data.get('full', False))
