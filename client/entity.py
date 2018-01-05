@@ -13,6 +13,8 @@ class Entity(pygame.sprite.Sprite):
         self.sprites = [[pygame.Surface((1, 1))]] * 4
         self.pressed_keys = []
         self.walking = False
+        self.walk_tick_delay = 1
+        self.walk_tick_phase = 0
         self.standalone = False
 
     def update(self, data=None, full=False):
@@ -44,7 +46,10 @@ class Entity(pygame.sprite.Sprite):
 
     def update_image(self):
         if self.walking:
-            self.walk_phase += 1
+            self.walk_tick_phase += 1
+        if self.walk_tick_phase >=self.walk_tick_delay:
+            self.walk_tick_phase = 0
+            self.walk_phase+=1
         if self.walk_phase >= len(self.sprites[self.direction]):
             self.walk_phase = 0
         center = self.rect.center
@@ -71,7 +76,9 @@ class NPC(Entity):
 class Player(Entity):
     def __init__(self):
         super().__init__()
-        self.sprites = [[pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))) for i in
+        self.walk_tick_delay = 150
+        zoom = lambda img, factor: pygame.transform.scale(img, (int(img.get_width()*factor), int(img.get_height()*factor)))
+        self.sprites = [[zoom(pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))), 2) for i in
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
 
     def update(self, data=None, full=False):
