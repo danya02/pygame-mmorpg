@@ -21,12 +21,11 @@ class Entity(pygame.sprite.Sprite):
         if data is None:
             self.update_image()
         else:
-            mydata = None
             for i in data:
                 if i['id'] == self.id:
                     mydata = data.pop(data.index(i))
                     break
-            if mydata is None and full:
+            else:
                 self.kill()
                 return None
             deltax = mydata['x'] - self.rect.centerx
@@ -71,6 +70,10 @@ class Entity(pygame.sprite.Sprite):
 class NPC(Entity):
     def __init__(self):
         super().__init__()
+        self.walk_tick_delay = 150
+        zoom = lambda img, factor: pygame.transform.scale(img, (int(img.get_width()*factor), int(img.get_height()*factor)))
+        self.sprites = [[zoom(pygame.image.load('sprites/spr_chara{}_{}.png'.format(j, str(i))), 2) for i in
+                         range(2 if j in 'lr' else 4)] for j in 'urdl']
 
 
 class Player(Entity):
