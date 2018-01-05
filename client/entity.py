@@ -27,6 +27,17 @@ class Entity(pygame.sprite.Sprite):
             if mydata is None and full:
                 self.kill()
                 return None
+            deltax = mydata['x'] - self.rect.centerx
+            deltay = mydata['y'] - self.rect.centery
+            if deltax > 0:
+                self.direction = 1
+            if deltax < 0:
+                self.direction = 3
+            if deltay > 0:
+                self.direction = 2
+            if deltay < 0:
+                self.direction = 0
+            self.walking = abs(deltax)+abs(deltay)>0
             self.rect.centerx = mydata['x']
             self.rect.centery = mydata['y']
             return mydata

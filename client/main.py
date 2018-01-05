@@ -21,7 +21,23 @@ if __name__ == '__main__':
     frame.gamefield.players.add(chara)
     frame.start()
     while 1:
-        frame.gamefield.update(
-            {'players': [{'id': 'FRISK', 'x': 400+(int(math.sin(time.time()) * 300)), 'y': 300+(int(math.cos(time.time())*250))}],
-             'npcs': [], 'entities': []})
-        time.sleep(1/30)
+        n=200
+        for i in range(30):
+            frame.gamefield.update({'players': [{'id': 'FRISK', 'x': 200, 'y': n}],'npcs': [], 'entities': []})
+            n+=5
+            time.sleep(1/30)
+        n=200
+        for i in range(30):
+            frame.gamefield.update({'players': [{'id': 'FRISK', 'x': n, 'y': 350}],'npcs': [], 'entities': []})
+            n+=5
+            time.sleep(1 / 30)
+        n=350
+        for i in range(30):
+            frame.gamefield.update({'players': [{'id': 'FRISK', 'x': 350, 'y': n}],'npcs': [], 'entities': []})
+            n-=5
+            time.sleep(1 / 30)
+        n=350
+        for i in range(30):
+            frame.gamefield.update({'players': [{'id': 'FRISK', 'x': n, 'y': 200}],'npcs': [], 'entities': []})
+            n-=5
+            time.sleep(1 / 30)
