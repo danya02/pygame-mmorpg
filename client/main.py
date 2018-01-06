@@ -7,6 +7,7 @@ import entity
 import gamefield
 import login
 import window
+import effects
 
 
 class TestClient:
@@ -37,9 +38,9 @@ def auth():
 
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
-client = module_client.WSClient(frame.gamefield)
-if __name__ == '__main__':
-    auth()
+client = TestClient()
+#if __name__ == '__main__':
+#    auth()
 
 if __name__ == '__main__':
 
@@ -48,6 +49,7 @@ if __name__ == '__main__':
     chara.id = 'CHARA'
     chara.standalone = True
     chara.transmit = True
+    chara.effects.append(effects.Poison(chara))
     frame.on_keypress = chara.on_keypress
     frame.on_keyrelease = chara.on_keyrelease
     frame.gamefield.players.add(chara)
