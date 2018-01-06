@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pygame
 import main
+import effects
 
 
 class Entity(pygame.sprite.Sprite):
@@ -17,7 +18,7 @@ class Entity(pygame.sprite.Sprite):
         self.walk_phase = 0
         self.sprites = [[pygame.Surface((1, 1))]] * 4
         self.pressed_keys = []
-        self.effects = []
+        self.effects = [effects.Effect(self)]
         self.walking = False
         self.walk_tick_delay = 1
         self.walk_tick_phase = 0
