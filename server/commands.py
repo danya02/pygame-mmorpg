@@ -130,6 +130,7 @@ def reg(self, data):
                 'hp': 100,
                 'x': 100,
                 'y': 100,
+                'direction': 0,
                 'active_item': None,
             }
         }

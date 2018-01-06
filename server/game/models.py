@@ -3,12 +3,14 @@ from pygame import Rect
 
 class Object:
     id = '0'
+    type = 'object'
 
     def __init__(self, rect, field):
         self.rect = rect
         self.field = field
         self.collide = True
 
+        self.direction = 0
         self.speed_x, self.speed_y = 0, 0
         self.moving = False
 
@@ -30,7 +32,8 @@ class Object:
         objects = self.field.objects + self.field.players + self.field.npc + self.field.entities
         objects.remove(self)
         if self.field.rect.contains(rect) \
-                and((rect.collidelist(list(filter(lambda x: x.collide, objects))) == -1) or not self.collide):
+                and((rect.collidelist((list(map(lambda x: x.rect,
+                                                filter(lambda x: x.collide, objects)))))) or not self.collide):
             return False
         return True
 
@@ -45,23 +48,30 @@ class Object:
         return i
 
 
-class Entities(Object):
+class Entity(Object):
     id = '150'
+    type = 'entity'
 
     def __init__(self, rect, field):
-        super(Entities, self).__init__(rect, field)
+        super(Entity, self).__init__(rect, field)
         self.collide = False
         self.touchable = True
 
     def update(self):
-        super(Entities, self).update()
+        super(Entity, self).update()
         if self.touchable:
-            pass
-            # TODO: touch event
+            objects = self.field.objects + self.field.players + self.field.npc + self.field.entities
+            objects.remove(self)
+            self.action([objects[i] for i in self.rect.collidelistall(list(map(lambda x: x.rect,
+                                                                               filter(lambda x: x.collide, objects))))])
+
+    def action(self, *_):
+        pass
 
 
-class Item(Entities):
+class Item(Entity):
     id = '50'
+    type = 'item'
 
     def __init__(self, rect, field):
         super(Item, self).__init__(rect, field)
@@ -94,6 +104,7 @@ class Weapon(Item):
 
 class Effect:
     id = '100'
+    type = 'effect'
 
     def __init__(self, player, ticks, delay):
         self.player = player
@@ -113,6 +124,8 @@ class Effect:
 
 
 class NPC(Object):
+    type = 'NPC'
+
     def __init__(self, rect, field, hp):
         super(NPC, self).__init__(rect, field)
         self.hp = hp

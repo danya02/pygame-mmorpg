@@ -12,6 +12,7 @@ import traceback
 import gzip
 from db import Db
 import game.actions
+import game.game
 
 lock = threading.Lock()
 db = Db(lock)

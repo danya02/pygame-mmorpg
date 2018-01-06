@@ -1,6 +1,6 @@
-from game.models import *
-from game.effects import *
-from game.entities import *
+from .models import *
+from .effects import *
+from .entities import *
 
 
 class Sword(Weapon):
@@ -62,4 +62,4 @@ class FireStaff(Weapon):
 
     def action(self, player):
         super(FireStaff, self).action(player)
-        self.field.spawn_entity()  # TODO: FireBall
+        self.field.spawn_entity(FireBall(self.field, self.rect), player.rect.x, player.rect.y, player.speed_x)  # TODO: Speed

@@ -11,7 +11,7 @@ from pygame import Rect
 
 
 class Player(game.models.NPC):
-    def __init__(self, x, y, hp, inventory, active_item, field, user):
+    def __init__(self, x, y, hp, inventory, active_item, direction, field, user):
         super(Player, self).__init__(Rect(x, y, PLAYER_WIDTH, PLAYER_HEIGHT), field, hp)
         self.name = user.user
         self.id = user.id
@@ -20,20 +20,20 @@ class Player(game.models.NPC):
         self.active_item = active_item
 
         self.speed_x = self.speed_y = 0
-        self.direction = 0
+        self.direction = direction
 
     def action(self, act):
         if act == 'left':
-            self.speed_x = -1
+            self.speed_x = -PLAYER_SPEED
             self.direction = 3
         elif act == 'right':
-            self.speed_x = 1
+            self.speed_x = PLAYER_SPEED
             self.direction = 1
         elif act == 'up':
-            self.speed_y = -1
+            self.speed_y = -PLAYER_SPEED
             self.direction = 0
         elif act == 'down':
-            self.speed_y = 1
+            self.speed_y = PLAYER_SPEED
             self.direction = 2
 
     def drop_item(self, item):
@@ -90,13 +90,15 @@ class Field:
             entity.update()
         self.tick += 1
 
-    def add_player(self, x, y, hp, inventory, active_item, user):
-        player = Player(x, y, hp, self, user, inventory, active_item)
+    def add_player(self, x, y, hp, inventory, active_item, direction, user):
+        player = Player(x, y, hp, inventory, direction, active_item, self, user)
         self.players.append(player)
 
-    def spawn_entity(self, entity, x, y):
+    def spawn_entity(self, entity, x, y, speed_x, speed_y):
         entity.rect.x = x
         entity.rect.y = y
+        entity.speed_x = speed_x,
+        entity.speed_y = speed_y
         self.entities.append(entity)
 
     @staticmethod
@@ -110,13 +112,15 @@ class Field:
     @staticmethod
     def get_attr(obj, attr='id'):
         try:
-            return obj.__getattribute__(obj, attr)
+            return getattr(obj, attr)
         except AttributeError:
             return False
 
     def get_object_by_id(self, item_id):
         if type(item_id) == list:
             return [self.get_object_by_id(i) for i in item_id]
+        all_objects = list(filter(lambda x: self.get_attr(x),
+                                  map(lambda x: getattr(game.objects, x), dir(game.objects))))
         ids = list(map(lambda x: x.id, all_objects))
         return all_objects[ids.index(item_id)]
 
@@ -131,7 +135,7 @@ class Game:
         active_item = self.field.get_object_by_id(user.player_info['active_item'])
         self.field.add_player(user.player_info['x'], user.player_info['y'],
                               user.player_info['hp'], inventory,
-                              active_item, user)
+                              active_item, user.player_info['direction'], user)
 
     @staticmethod
     def get_img(img):
@@ -141,11 +145,51 @@ class Game:
         }
 
     def start(self):
-        # TODO: data send
         while True:
             self.field.do_tick()
+            data = {
+                'players': [
+                    {
+                        'x': player.x,
+                        'y': player.y,
+                        'hp': player.hp,
+                        'user': player.user,
+                        'effects': [
+                            {
+                                'id': effect.id,
+                                'ticks': effect.ticks
+                            } for effect in player.effects
+                        ]
+                    } for player in self.field.players
+                ],
+                'objects': [
+                    {
+                        'x': obj.x,
+                        'y': obj.y,
+                        'id': obj.id
+                    } for obj in self.field.objects
+                ],
+                'entities': [
+                    {
+                        'x': entity.x,
+                        'y': entity.y,
+                        'id': entity.id
+                    } for entity in self.field.players
+                ],
+                'npcs': [
+                    {
+                        'x': npc.x,
+                        'y': npc.y,
+                        'hp': npc.hp,
+                        'effects': [
+                            {
+                                'id': effect.id,
+                                'ticks': effect.ticks
+                            } for effect in npc.effects
+                        ]
+                    } for npc in self.field.npc
+                ]
+            }
+            self.channel.send(data)
             time.sleep(TICK)
 
-
-all_objects = list(filter(Field.get_attr, game.items.__dir__() + game.entities.__dir__()
-                     + game.objects.__dir__() + game.effects.__dir__()))
