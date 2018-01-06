@@ -82,7 +82,7 @@ class Handler(WebSocketServerProtocol):
             action = action.lower()
             data = message.get('data')
             try:
-                resp = commands.__action(self, action, data)
+                resp = commands.action1(self, action, data)
             except Exception as ex:
                 resp = {'type': action + '_error', 'data': str(ex)}
                 self.logger.error('%s Error %s %s %s' % (self.addr, action, data, str(ex)))
@@ -92,14 +92,11 @@ class Handler(WebSocketServerProtocol):
         self.ws_send(json.dumps(resp))
 
     def onClose(self, *args):
-        try:
-            commands.leave(self, None)
-            if self.channel:
-                self.channel.leave(self)
-            self.temp.handlers.remove(self)
-            self.logger.info('%s Disconnect' % (self.addr,))
-        except:
-            pass
+        commands.leave(self, None)
+        if self.channel:
+            self.channel.leave(self)
+        self.temp.handlers.remove(self)
+        self.logger.info('%s Disconnect' % (self.addr,))
 
 
 class Thread(threading.Thread):

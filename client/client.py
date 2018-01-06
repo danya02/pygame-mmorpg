@@ -5,7 +5,6 @@ import websocket
 import gzip
 import threading
 import json
-import time
 
 
 class WSClient(threading.Thread):
@@ -55,3 +54,6 @@ class WSClient(threading.Thread):
 
     def run(self):
         self.ws_connection.run_forever()
+
+    def session_auth(self, session):
+        self.send_message({'type': 'session_auth', 'data': {'session': session}})

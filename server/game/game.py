@@ -145,6 +145,10 @@ class Game(threading.Thread):
                                      user.player_info['hp'], inventory,
                                      active_item, user.player_info['direction'], user)
 
+    def delete_player(self, user):
+        self.field.players.remove(user.me)
+        self.channel.send({'type': 'player_left', 'data': ''})
+
     @staticmethod
     def get_img(img):
         return {
@@ -161,7 +165,7 @@ class Game(threading.Thread):
                         'x': player.rect.x,
                         'y': player.rect.y,
                         'hp': player.hp,
-                        'user': player.user,
+                        'user_info': player.user.get_information(),
                         'effects': [
                             {
                                 'id': effect.id,

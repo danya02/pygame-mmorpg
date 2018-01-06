@@ -179,7 +179,7 @@ def send_message(self, data):
     return {'type': 'send_ok', 'data': ''}
 
 
-def __action(self, action, data):
+def action1(self, action, data):
     resp = self.me.action(action, data)
     return {'type': 'action_%s_ok' % action, 'data': resp}
 
@@ -206,8 +206,10 @@ def get_channel_information(self, _):
 
 
 @perms_check(0)
-def leave(*_):
-    pass
+def leave(self, _):
+    self.game.delete_player(self)
+    self.me = None
+    return {'type': 'leave_ok', 'data': ''}
 
 
 @perms_check(0)
@@ -222,21 +224,8 @@ def ping(_, data):
     return {'type': 'pong', 'data': time.time() - data}
 
 
-def count(self, _):
-    if self.count == 0:
-        self.t = time.time()
-    if self.count == 999:
-        print(time.time() - self.t)
-    self.count += 1
-    return {"type": "count_ok", "data": None}
-
-
 def error(*_):
     """
     System method
     """
     return {'type': 'error', 'data': 'Bad request'}
-
-
-def _Handler__action(*args):
-    return __action(*args)
