@@ -9,7 +9,7 @@ import time
 
 
 class WSClient(threading.Thread):
-    def __init__(self, field, url='ws://localhost:8000'):
+    def __init__(self, field, url='ws://10.42.0.233:8000'):
         threading.Thread.__init__(self, target=self.run)
         self.field = field
         self.url = url
@@ -20,6 +20,7 @@ class WSClient(threading.Thread):
             on_close=self.on_close
         )
         self.ws_connection.keep_running = True
+        self.start()
 
     def send_message(self, data):
         """
@@ -35,7 +36,10 @@ class WSClient(threading.Thread):
         data = json.loads(data.decode('utf-8'))
         typ = data['type']
         data = data['data']
-        if typ == 'tick':
+        if typ == 'auth_ok':
+            with open('.cookie', 'w') as o:
+                o.write(data['session'])
+        elif typ == 'tick':
             self.field.update(data)
         else:
             print(typ, data)

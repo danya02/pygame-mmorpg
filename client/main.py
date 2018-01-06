@@ -1,14 +1,12 @@
 #!/usr/bin/python3
-import sys
-import time
-import tkinter
 import os
+import tkinter
 
-sys.path.append('.')
-import window
-import gamefield
+import client as module_client
 import entity
+import gamefield
 import login
+import window
 
 
 class TestClient:
@@ -23,26 +21,28 @@ class TestClient:
         print(action_type)
 
 
-client = TestClient()
-
-
 def auth():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
+        raise PermissionError
         with open('.cookie') as i:
             client.session_auth(i.read())
     except (FileNotFoundError, PermissionError):
         root = tkinter.Tk()
         lf = login.LoginFrame(root)
-        root.mainloop()
+        try:
+            root.mainloop()
+        except SystemExit:
+            pass
 
-
+frame = window.Window()
+frame.gamefield = gamefield.GameField()
+client = module_client.WSClient(frame.gamefield)
 if __name__ == '__main__':
     auth()
 
-    frame = window.Window()
-    frame.gamefield = gamefield.GameField()
-    client.field = frame.gamefield
+if __name__ == '__main__':
+
 
     chara = entity.Player()
     chara.id = 'CHARA'
