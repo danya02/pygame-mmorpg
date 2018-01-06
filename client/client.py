@@ -5,14 +5,13 @@ import websocket
 import gzip
 import threading
 import json
-import client_commands
 import time
 
 
 class WSClient(threading.Thread):
-    def __init__(self, url):
+    def __init__(self, field, url='ws://10.42.0.233:8000'):
         threading.Thread.__init__(self, target=self.run)
-        # self.field = field
+        self.field = field
         self.url = url
         self.ws_connection = websocket.WebSocketApp(
             self.url,
@@ -21,6 +20,7 @@ class WSClient(threading.Thread):
             on_close=self.on_close
         )
         self.ws_connection.keep_running = True
+        self.start()
 
     def send_message(self, data):
         """
@@ -34,24 +34,24 @@ class WSClient(threading.Thread):
     def on_message(self, _, data):
         data = gzip.decompress(data)
         data = json.loads(data.decode('utf-8'))
-        message_type = data['type']
+        typ = data['type']
         data = data['data']
-        try:
-            client_commands.__getattribute__(message_type)(self, data)
-        except:
-            pass
+        if typ == 'auth_ok':
+            with open('.cookie', 'w') as o:
+                o.write(data['session'])
+        elif typ == 'tick':
+            self.field.update(data)
+        else:
+            print(typ, data)
 
     def on_close(self, _):
         self.ws_connection.keep_running = False
 
+    def action(self, action_type, data=''):
+        self.send_message({'action': action_type, 'data': data})
+
+    def auth(self, user, password):
+        self.send_message({'type': 'auth', 'data': {'user': user, 'password': password}})
+
     def run(self):
         self.ws_connection.run_forever()
-
-
-ws = WSClient('ws://localhost:8000')
-ws.start()
-time.sleep(2)
-t = time.time()
-for _ in range(1000):
-    ws.send_message({"type": "count", "data": ""})
-print('Finish' + str(time.time() - t))

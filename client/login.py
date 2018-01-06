@@ -37,13 +37,7 @@ class LoginFrame(Frame):
         username = self.entry_1.get()
         password = self.entry_2.get()
         client = main.client
-        try:
-            cookie = client.auth(username, password)['session']
-        except PermissionError:
-            tm.showerror('Try again!', 'The login and/or password was incorrect. Please retry.')
-        else:
-            with open('.cookie', 'w') as o:
-                o.write(cookie)
+        client.auth(username, password)
 
 
 if __name__ == '__main__':
