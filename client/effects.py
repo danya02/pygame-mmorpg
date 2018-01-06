@@ -3,6 +3,7 @@ import pygame
 import threading
 import random
 import time
+import math
 
 
 class Effect(threading.Thread):
@@ -17,7 +18,7 @@ class Effect(threading.Thread):
         self.running = True
         while self.running:
             time.sleep(self.delay)
-            self.target.image = self.target.original_image
+            self.target.image = self.target.original_image.copy()
 
 
 class Poison(Effect):
@@ -49,5 +50,6 @@ class Fire(Effect):
             if self.do_effect:
                 for i in range(self.target.image.get_width()):
                     for j in range(self.target.image.get_height()):
-                        if random.randint(0, 1000) > 800 and self.target.image.get_at((i, j)).a != 0:
-                            self.target.image.set_at((i, j), pygame.Color('red'))
+                        if random.random() > 1 - (j / self.target.image.get_height()) * abs(
+                                math.sin(time.time())) and self.target.image.get_at((i, j)).a != 0:
+                            self.target.image.set_at((i, j), pygame.Color('orange' if random.randint(0, 1) else 'red'))
