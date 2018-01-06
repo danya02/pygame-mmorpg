@@ -36,9 +36,7 @@ def auth():
 
 
 if __name__ == '__main__':
-    root = tkinter.Tk()
-    lf = login.LoginFrame(root)
-    root.mainloop()
+    auth()
 
     frame = window.Window()
     frame.gamefield = gamefield.GameField()
