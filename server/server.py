@@ -11,7 +11,6 @@ import threading
 import traceback
 import gzip
 from db import Db
-import game.actions
 import game.game
 
 lock = threading.Lock()
@@ -32,6 +31,7 @@ class Handler(WebSocketServerProtocol):
         self.typing = False
         self.logger = logging.getLogger('WSServer')
         self.player_info = {}
+        self.game = main_game
 
     def ws_send(self, message):
         data = gzip.compress(message.encode('utf-8'))
@@ -75,16 +75,18 @@ class Handler(WebSocketServerProtocol):
             except Exception as ex:
                 resp = {'type': message_type + '_error', 'data': str(ex)}
                 self.logger.error('%s Error %s %s %s' % (self.addr, message_type, data, str(ex)))
+                traceback.print_exc()
         elif message.get('action'):
             action = message['action']
             action = action.replace('__', '')
             action = action.lower()
             data = message.get('data')
             try:
-                resp = game.actions.__getattribute__(action)(self, data)
+                resp = commands.__action(self, action, data)
             except Exception as ex:
                 resp = {'type': action + '_error', 'data': str(ex)}
                 self.logger.error('%s Error %s %s %s' % (self.addr, action, data, str(ex)))
+                traceback.print_exc()
         else:
             resp = commands.error(None, None)
         self.ws_send(json.dumps(resp))
@@ -131,6 +133,8 @@ def run(secret_key):
 
 if __name__ == '__main__':
     sk = 'shouldintermittentvengeancearmagainhisredrighthandtoplagueus'
+    main_game = game.game.Game(db.main_channel)
+    main_game.start()
     run(sk)
     while True:
         try:

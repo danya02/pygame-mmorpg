@@ -5,6 +5,7 @@ import game.objects
 import game.effects
 import game.models
 
+import threading
 import time
 import pygame
 from pygame import Rect
@@ -14,7 +15,7 @@ class Player(game.models.NPC):
     def __init__(self, x, y, hp, inventory, active_item, direction, field, user):
         super(Player, self).__init__(Rect(x, y, PLAYER_WIDTH, PLAYER_HEIGHT), field, hp)
         self.name = user.user
-        self.id = user.id
+        self.id = user.user_id
         self.user = user
         self.inventory = inventory
         self.active_item = active_item
@@ -22,7 +23,7 @@ class Player(game.models.NPC):
         self.speed_x = self.speed_y = 0
         self.direction = direction
 
-    def action(self, act):
+    def action(self, act, data):
         if act == 'left':
             self.speed_x = -PLAYER_SPEED
             self.direction = 3
@@ -93,6 +94,7 @@ class Field:
     def add_player(self, x, y, hp, inventory, active_item, direction, user):
         player = Player(x, y, hp, inventory, direction, active_item, self, user)
         self.players.append(player)
+        return player
 
     def spawn_entity(self, entity, x, y, speed_x, speed_y):
         entity.rect.x = x
@@ -125,17 +127,18 @@ class Field:
         return all_objects[ids.index(item_id)]
 
 
-class Game:
+class Game(threading.Thread):
     def __init__(self, channel):
+        threading.Thread.__init__(self, target=self.run)
         self.channel = channel
         self.field = Field()
 
     def add_player(self, user):
         inventory = self.field.get_object_by_id(user.player_info['inventory'])
         active_item = self.field.get_object_by_id(user.player_info['active_item'])
-        self.field.add_player(user.player_info['x'], user.player_info['y'],
-                              user.player_info['hp'], inventory,
-                              active_item, user.player_info['direction'], user)
+        return self.field.add_player(user.player_info['x'], user.player_info['y'],
+                                     user.player_info['hp'], inventory,
+                                     active_item, user.player_info['direction'], user)
 
     @staticmethod
     def get_img(img):
@@ -144,14 +147,14 @@ class Game:
                 'size': img.get_size()
         }
 
-    def start(self):
+    def run(self):
         while True:
             self.field.do_tick()
             data = {
                 'players': [
                     {
-                        'x': player.x,
-                        'y': player.y,
+                        'x': player.rect.x,
+                        'y': player.rect.y,
                         'hp': player.hp,
                         'user': player.user,
                         'effects': [
@@ -164,22 +167,22 @@ class Game:
                 ],
                 'objects': [
                     {
-                        'x': obj.x,
-                        'y': obj.y,
+                        'x': obj.rect.x,
+                        'y': obj.rect.y,
                         'id': obj.id
                     } for obj in self.field.objects
                 ],
                 'entities': [
                     {
-                        'x': entity.x,
-                        'y': entity.y,
+                        'x': entity.rect.x,
+                        'y': entity.rect.y,
                         'id': entity.id
                     } for entity in self.field.players
                 ],
                 'npcs': [
                     {
-                        'x': npc.x,
-                        'y': npc.y,
+                        'x': npc.rect.x,
+                        'y': npc.rect.y,
                         'hp': npc.hp,
                         'effects': [
                             {
@@ -190,6 +193,6 @@ class Game:
                     } for npc in self.field.npc
                 ]
             }
-            self.channel.send(data)
+            self.channel.send({'type': 'tick', 'data': data})
             time.sleep(TICK)
 

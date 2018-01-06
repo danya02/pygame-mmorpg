@@ -5,7 +5,6 @@
 
 import json
 import time
-import game.actions
 import sessions
 from config import *
 
@@ -60,6 +59,7 @@ def __auth(self, user, session=None, auth_type='auth_ok'):
         'type': 'user_logged_in',
         'data': self.get_information()
     })
+    self.game.add_player(self)
     return resp
 
 
@@ -180,9 +180,9 @@ def send_message(self, data):
 
 
 @perms_check(1)
-def action(self, data):
+def __action(self, data):
     action_type = data['action_type'].replace('__', '')
-    resp = game.actions.__getattribute__(action_type)(self, data)
+    resp = self.me.action(action_type, data)
     return {'type': 'action_%s_ok' % action_type, 'data': resp}
 
 
