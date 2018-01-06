@@ -5,7 +5,6 @@
 
 import json
 import time
-import game.actions
 import sessions
 from config import *
 
@@ -60,6 +59,7 @@ def __auth(self, user, session=None, auth_type='auth_ok'):
         'type': 'user_logged_in',
         'data': self.get_information()
     })
+    self.me = self.game.add_player(self)
     return resp
 
 
@@ -179,11 +179,9 @@ def send_message(self, data):
     return {'type': 'send_ok', 'data': ''}
 
 
-@perms_check(1)
-def action(self, data):
-    action_type = data['action_type'].replace('__', '')
-    resp = game.actions.__getattribute__(action_type)(self, data)
-    return {'type': 'action_%s_ok' % action_type, 'data': resp}
+def __action(self, action, data):
+    resp = self.me.action(action, data)
+    return {'type': 'action_%s_ok' % action, 'data': resp}
 
 
 @perms_check(0)
@@ -238,3 +236,7 @@ def error(*_):
     System method
     """
     return {'type': 'error', 'data': 'Bad request'}
+
+
+def _Handler__action(*args):
+    return __action(*args)
