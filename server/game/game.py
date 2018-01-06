@@ -68,6 +68,11 @@ class Player(game.models.NPC):
         self.field.entities.remove(item)
         item.dropped = False
 
+    def update(self):
+        super(Player, self).update()
+        self.speed_x = 0
+        self.speed_y = 0
+
 
 class Field:
     def __init__(self):

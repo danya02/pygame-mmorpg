@@ -88,7 +88,7 @@ class Handler(WebSocketServerProtocol):
                 self.logger.error('%s Error %s %s %s' % (self.addr, action, data, str(ex)))
                 traceback.print_exc()
         else:
-            resp = commands.error(None, None)
+            resp = commands.error(None)
         self.ws_send(json.dumps(resp))
 
     def onClose(self, *args):
