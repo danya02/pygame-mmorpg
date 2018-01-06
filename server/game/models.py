@@ -106,14 +106,14 @@ class Effect:
     id = '100'
     type = 'effect'
 
-    def __init__(self, player, ticks, delay):
-        self.player = player
+    def __init__(self, npc, ticks, delay):
+        self.npc = npc
         self.ticks = ticks
         self.delay = delay
 
     def update(self):
         if self.ticks == 0:
-            self.player.effects.remove(self)
+            self.npc.effects.remove(self)
             return
         if not self.ticks % self.delay:
             self.action()

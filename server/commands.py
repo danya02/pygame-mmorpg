@@ -207,8 +207,20 @@ def get_channel_information(self, _):
 
 @perms_check(0)
 def leave(self, _):
+    if (not self.game) or (not self.me):
+        return {'type': 'leave_ok', 'data': ''}
     self.game.delete_player(self)
+    self.player_info = {
+        'inventory': self.me.inventory,
+        'effects': self.me.effects,
+        'hp': self.me.hp,
+        'x': self.me.x,
+        'y': self.me.y,
+        'direction': self.me.direction,
+        'active_item': self.me.active_item,
+    }
     self.me = None
+    self.db.db_save_all()
     return {'type': 'leave_ok', 'data': ''}
 
 

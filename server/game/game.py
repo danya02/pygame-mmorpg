@@ -186,7 +186,7 @@ class Game(threading.Thread):
                         'x': entity.rect.x,
                         'y': entity.rect.y,
                         'id': entity.id
-                    } for entity in self.field.players
+                    } for entity in self.field.entities
                 ],
                 'npcs': [
                     {
@@ -204,4 +204,3 @@ class Game(threading.Thread):
             }
             self.channel.send({'type': 'tick', 'data': data})
             time.sleep(TICK)
-
