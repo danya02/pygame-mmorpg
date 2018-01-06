@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pygame
+import main
 
 
 class Entity(pygame.sprite.Sprite):
@@ -93,6 +94,7 @@ class Player(Entity):
             int(img.get_width() * factor), int(img.get_height() * factor)))
         self.sprites = [[zoom(pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))), 2) for i in
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
+        self.transmit = False
 
     def update(self, data=None, full=False):
         if not self.standalone:
@@ -107,6 +109,16 @@ class Player(Entity):
             if pygame.K_RIGHT in self.pressed_keys:
                 self.rect.centerx += 1
             self.update_image()
+        if self.transmit:
+            if pygame.K_UP in self.pressed_keys:
+                main.client.action(action_type='up')
+            if pygame.K_DOWN in self.pressed_keys:
+                main.client.action(action_type='down')
+            if pygame.K_LEFT in self.pressed_keys:
+                main.client.action(action_type='left')
+            if pygame.K_RIGHT in self.pressed_keys:
+                main.client.action(action_type='right')
+
 
     def on_keypress(self, key):
         self.pressed_keys.append(key)

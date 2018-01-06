@@ -17,8 +17,12 @@ class TestClient:
     def auth(self, usr, passwd):
         print(usr, passwd)
         return 'COOKIE!'
+
     def session_auth(self, cookie):
         print(cookie)
+
+    def action(self, action_type=None):
+        print(action_type)
 
 
 client = TestClient()
@@ -40,10 +44,12 @@ if __name__ == '__main__':
 
     frame = window.Window()
     frame.gamefield = gamefield.GameField()
+    client.field = frame.gamefield
 
     chara = entity.Player()
     chara.id = 'CHARA'
     chara.standalone = True
+    chara.transmit = True
     frame.on_keypress = chara.on_keypress
     frame.on_keyrelease = chara.on_keyrelease
     frame.gamefield.players.add(chara)
