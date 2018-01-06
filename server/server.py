@@ -58,6 +58,7 @@ class Handler(WebSocketServerProtocol):
                 'version': VERSION
             }
         }))
+        self.channel.join(self)
 
     def onMessage(self, payload, is_binary):
         try:
