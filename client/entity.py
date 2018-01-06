@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pygame
 import main
+import effects
 
 
 class Entity(pygame.sprite.Sprite):
@@ -11,11 +12,13 @@ class Entity(pygame.sprite.Sprite):
         super().__init__()
         self.id = None
         self.image = pygame.Surface((1, 1))
+        self.original_image = pygame.Surface((1, 1))
         self.rect = self.image.get_rect()
         self.direction = 2
         self.walk_phase = 0
         self.sprites = [[pygame.Surface((1, 1))]] * 4
         self.pressed_keys = []
+        self.effects = [effects.Effect(self)]
         self.walking = False
         self.walk_tick_delay = 1
         self.walk_tick_phase = 0
@@ -54,6 +57,10 @@ class Entity(pygame.sprite.Sprite):
             return mydata
 
     def update_image(self):
+        for i in self.effects:
+            i.target = self
+            if not i.running:
+                i.start()
         if self.walking:
             self.walk_tick_phase += 1
         if self.walk_tick_phase >= self.walk_tick_delay:
@@ -62,7 +69,7 @@ class Entity(pygame.sprite.Sprite):
         if self.walk_phase >= len(self.sprites[self.direction]):
             self.walk_phase = 0
         center = self.rect.center
-        self.image = self.sprites[self.direction][self.walk_phase]
+        self.original_image = self.sprites[self.direction][self.walk_phase]
         self.rect = self.image.get_rect()
         self.rect.center = center
 
