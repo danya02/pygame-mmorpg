@@ -48,7 +48,7 @@ class WSClient(threading.Thread):
         self.ws_connection.run_forever()
 
 
-ws = WSClient('ws://92.63.105.60:8000')
+ws = WSClient('ws://localhost:8000')
 ws.start()
 time.sleep(2)
 t = time.time()

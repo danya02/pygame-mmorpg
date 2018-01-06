@@ -1,18 +1,23 @@
-from game.models import *
 from game.config import *
-from game.effects import *
-from game.items import *
-from game.entities import *
+import game.items
+import game.entities
+import game.objects
+import game.effects
+import game.models
+
+import time
 import pygame
 from pygame import Rect
 
 
-class Player(NPC):
-    def __init__(self, x, y, hp, field, user):
+class Player(game.models.NPC):
+    def __init__(self, x, y, hp, inventory, active_item, field, user):
         super(Player, self).__init__(Rect(x, y, PLAYER_WIDTH, PLAYER_HEIGHT), field, hp)
         self.name = user.user
+        self.id = user.id
         self.user = user
-        self.inventory = []
+        self.inventory = inventory
+        self.active_item = active_item
 
         self.speed_x = self.speed_y = 0
         self.direction = 0
@@ -85,11 +90,14 @@ class Field:
             entity.update()
         self.tick += 1
 
-    def add_player(self, x, y, hp, user):
-        player = Player(x, y, hp, self, user)
+    def add_player(self, x, y, hp, inventory, active_item, user):
+        player = Player(x, y, hp, self, user, inventory, active_item)
         self.players.append(player)
 
-    # TODO: add_entity
+    def spawn_entity(self, entity, x, y):
+        entity.rect.x = x
+        entity.rect.y = y
+        self.entities.append(entity)
 
     @staticmethod
     def add_effect(effect):
@@ -99,6 +107,19 @@ class Field:
                 npc.effects.remove(eff)
         npc.effects.append(effect)
 
+    @staticmethod
+    def get_attr(obj, attr='id'):
+        try:
+            return obj.__getattribute__(obj, attr)
+        except AttributeError:
+            return False
+
+    def get_object_by_id(self, item_id):
+        if type(item_id) == list:
+            return [self.get_object_by_id(i) for i in item_id]
+        ids = list(map(lambda x: x.id, all_objects))
+        return all_objects[ids.index(item_id)]
+
 
 class Game:
     def __init__(self, channel):
@@ -106,7 +127,11 @@ class Game:
         self.field = Field()
 
     def add_player(self, user):
-        self.field.add_player(user.player_info['x'], user.player_info['y'], user.player_info['hp'], user)
+        inventory = self.field.get_object_by_id(user.player_info['inventory'])
+        active_item = self.field.get_object_by_id(user.player_info['active_item'])
+        self.field.add_player(user.player_info['x'], user.player_info['y'],
+                              user.player_info['hp'], inventory,
+                              active_item, user)
 
     @staticmethod
     def get_img(img):
@@ -114,3 +139,13 @@ class Game:
                 'src': str(pygame.image.tostring(img, 'RGBA')),
                 'size': img.get_size()
         }
+
+    def start(self):
+        # TODO: data send
+        while True:
+            self.field.do_tick()
+            time.sleep(TICK)
+
+
+all_objects = list(filter(Field.get_attr, game.items.__dir__() + game.entities.__dir__()
+                     + game.objects.__dir__() + game.effects.__dir__()))

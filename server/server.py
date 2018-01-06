@@ -30,6 +30,7 @@ class Handler(WebSocketServerProtocol):
         self.addr = None
         self.typing = False
         self.logger = logging.getLogger('WSServer')
+        self.player_info = {}
 
     def ws_send(self, message):
         data = gzip.compress(message.encode('utf-8'))
@@ -40,6 +41,7 @@ class Handler(WebSocketServerProtocol):
             'user': self.user,
             'user_id': self.user_id,
             'user_rights': self.user_rights,
+            'player_info': self.player_info,
         }
 
     def onConnect(self, request):
@@ -118,11 +120,11 @@ def run(secret_key):
     factory = WebSocketServerFactory(u"ws://%s:%s" % (IP, PORT))
     factory.protocol = Handler
 
-    l = asyncio.get_event_loop()
-    coro = l.create_server(factory, IP, PORT)
-    s = l.run_until_complete(coro)
+    loop = asyncio.get_event_loop()
+    coro = loop.create_server(factory, IP, PORT)
+    loop.run_until_complete(coro)
 
-    thread = Thread(l.run_forever)
+    thread = Thread(loop.run_forever)
     return thread
 
 
