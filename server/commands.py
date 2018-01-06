@@ -60,6 +60,7 @@ def __auth(self, user, session=None, auth_type='auth_ok'):
         'data': self.get_information()
     })
     self.me = self.game.add_player(self)
+    self.channel.join(self)
     return resp
 
 

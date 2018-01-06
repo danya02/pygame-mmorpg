@@ -9,7 +9,7 @@ import time
 
 
 class WSClient(threading.Thread):
-    def __init__(self, field, url='ws://10.42.0.233:8000'):
+    def __init__(self, field, url='ws://92.63.105.60:8000'):
         threading.Thread.__init__(self, target=self.run)
         self.field = field
         self.url = url
