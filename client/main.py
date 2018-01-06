@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-import pygame
 import sys
-import math
 import time
 import tkinter
 import os
@@ -16,7 +14,7 @@ import login
 class TestClient:
     def auth(self, usr, passwd):
         print(usr, passwd)
-        return 'COOKIE!'
+        return {'session': 'COOKIE!'}
 
     def session_auth(self, cookie):
         print(cookie)
@@ -33,7 +31,7 @@ def auth():
     try:
         with open('.cookie') as i:
             client.session_auth(i.read())
-    except [FileNotFoundError, PermissionError]:
+    except (FileNotFoundError, PermissionError):
         root = tkinter.Tk()
         lf = login.LoginFrame(root)
         root.mainloop()
@@ -54,6 +52,8 @@ if __name__ == '__main__':
     frame.on_keyrelease = chara.on_keyrelease
     frame.gamefield.players.add(chara)
     frame.start()
+    while 1:
+        pass
     while 1:
         n = 200
         for i in range(30):

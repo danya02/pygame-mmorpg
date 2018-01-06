@@ -5,6 +5,9 @@ import main
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self):
+        """
+        This class describes an Entity. An Entity is an object that has sprites, and can be moved by the server.
+        """
         super().__init__()
         self.id = None
         self.image = pygame.Surface((1, 1))
@@ -18,7 +21,13 @@ class Entity(pygame.sprite.Sprite):
         self.walk_tick_phase = 0
         self.standalone = False
 
-    def update(self, data=None, full=False):
+    def update(self, data=None, full: bool = False):
+        """
+        Update this with given data. If no data, update the sprite instead.
+        :param data: data to find me in and to update from.
+        :param full: is the update a full one?
+        :return: my part of data, or None if there is no such.
+        """
         if data is None:
             self.update_image()
         else:
@@ -57,7 +66,11 @@ class Entity(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = center
 
-    def update_walking(self):
+    def update_walking(self) -> bool:
+        """
+        Am I walking?
+        :return: if I am walking.
+        """
         walk = False
         for i, j in enumerate([pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT]):
             if j in self.pressed_keys:
@@ -66,10 +79,14 @@ class Entity(pygame.sprite.Sprite):
         self.walking = walk
         if not self.walking:
             self.walk_phase = 0
+        return self.walking
 
 
 class NPC(Entity):
     def __init__(self):
+        """
+        This class describes an NPC. An NPC is an Entity that is a character not controlled by humans.
+        """
         super().__init__()
         self.walk_tick_delay = 150
         zoom = lambda img, factor: pygame.transform.scale(img, (
@@ -88,6 +105,10 @@ class Projectile(Entity):
 
 class Player(Entity):
     def __init__(self):
+        """
+        This class describes a Player. A Player is a character that a human controls.
+        That includes the player at this computer.
+        """
         super().__init__()
         self.walk_tick_delay = 150
         zoom = lambda img, factor: pygame.transform.scale(img, (
@@ -97,6 +118,13 @@ class Player(Entity):
         self.transmit = False
 
     def update(self, data=None, full=False):
+        """
+        Update this with given data. If no data, update the sprite instead.
+        If I am a standalone Player, ignore data and move myself instead.
+        :param data: data to find me in and to update from.
+        :param full: is the update a full one?
+        :return: my part of data, or None if there is no such.
+        """
         if not self.standalone:
             super().update(data, full)
         else:
@@ -119,12 +147,19 @@ class Player(Entity):
             if pygame.K_RIGHT in self.pressed_keys:
                 main.client.action(action_type='right')
 
-
-    def on_keypress(self, key):
+    def on_keypress(self, key) -> None:
+        """
+        Do this when the key is pressed.
+        :param key: the key that was pressed's ID.
+        """
         self.pressed_keys.append(key)
         self.update_walking()
 
-    def on_keyrelease(self, key):
+    def on_keyrelease(self, key) -> None:
+        """
+        Do this when the key is released.
+        :param key: the key that was released's ID.
+        """
         try:
             while 1:
                 self.pressed_keys.remove(key)

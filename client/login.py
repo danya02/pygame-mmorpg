@@ -6,6 +6,10 @@ import main
 
 class LoginFrame(Frame):
     def __init__(self, master):
+        """
+        Basic Tkinter frame for login and password entry.
+        :param master: root of this frame.
+        """
         super().__init__(master)
         self.label_1 = Label(self, text="Username")
         self.label_2 = Label(self, text="Password")
@@ -26,7 +30,10 @@ class LoginFrame(Frame):
 
         self.pack()
 
-    def _login_btn_clicked(self):
+    def _login_btn_clicked(self) -> None:
+        """
+        On clik of button.
+        """
         username = self.entry_1.get()
         password = self.entry_2.get()
         client = main.client
