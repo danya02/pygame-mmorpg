@@ -70,10 +70,10 @@ class GameField:
         surface.blit(self.surface, (0, 0))
         self.players.update()
         self.players.draw(surface)
-        self.entities.update()
-        self.entities.draw(surface)
         self.npcs.update()
         self.npcs.draw(surface)
+        self.entities.update()
+        self.entities.draw(surface)
 
     def send_from_player(self, data):
         self.send_message(data)
