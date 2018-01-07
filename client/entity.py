@@ -14,6 +14,8 @@ class Entity(pygame.sprite.Sprite):
         self.image = pygame.Surface((1, 1))
         self.original_image = pygame.Surface((1, 1))
         self.rect = self.image.get_rect()
+        self.original_center = (0, 0)
+        self.pan = (0, 0)
         self.direction = 2
         self.walk_phase = 0
         self.sprites = [[pygame.Surface((1, 1))]] * 4
@@ -33,6 +35,9 @@ class Entity(pygame.sprite.Sprite):
         """
         if data is None:
             self.update_image()
+        elif 'target' in data and data['target'] is not self and data['target'] is not None:
+            self.pan = (self.original_center[0]-data['target'].original_center[0], self.original_center[1]-data['target'].original_center[1])
+            self.update_image()
         else:
             for i in data:
                 if i['id'] == self.id:
@@ -41,8 +46,8 @@ class Entity(pygame.sprite.Sprite):
             else:
                 self.kill()
                 return None
-            deltax = mydata['x'] - self.rect.centerx
-            deltay = mydata['y'] - self.rect.centery
+            deltax = mydata['x'] - self.original_center[0]
+            deltay = mydata['y'] - self.original_center[1]
             if deltax > 0:
                 self.direction = 1
             if deltax < 0:
@@ -52,15 +57,17 @@ class Entity(pygame.sprite.Sprite):
             if deltay < 0:
                 self.direction = 0
             self.walking = abs(deltax) + abs(deltay) > 0
-            self.rect.centerx = mydata['x']
-            self.rect.centery = mydata['y']
+            self.original_center = mydata['x'], mydata['y']
             return mydata
 
-    def update_image(self):
+    def update_image(self, target=True):
         for i in self.effects:
             i.target = self
             if not i.running:
                 i.start()
+        if target:
+            self.rect.centerx = self.original_center[0] + self.pan[0]
+            self.rect.centery = self.original_center[1] + self.pan[1]
         if self.walking:
             self.walk_tick_phase += 1
         if self.walk_tick_phase >= self.walk_tick_delay:
@@ -68,10 +75,10 @@ class Entity(pygame.sprite.Sprite):
             self.walk_phase += 1
         if self.walk_phase >= len(self.sprites[self.direction]):
             self.walk_phase = 0
-        center = self.rect.center
+        target = self.rect.center
         self.original_image = self.sprites[self.direction][self.walk_phase]
         self.rect = self.image.get_rect()
-        self.rect.center = center
+        self.rect.center = target
 
     def update_walking(self) -> bool:
         """
@@ -136,14 +143,15 @@ class Player(Entity):
             super().update(data, full)
         else:
             if pygame.K_UP in self.pressed_keys:
-                self.rect.centery -= 1
+                self.original_center = (self.original_center[0], self.original_center[1] - 1)
             if pygame.K_DOWN in self.pressed_keys:
-                self.rect.centery += 1
+                self.original_center = (self.original_center[0], self.original_center[1] + 1)
             if pygame.K_LEFT in self.pressed_keys:
-                self.rect.centerx -= 1
+                self.original_center = (self.original_center[0] - 1, self.original_center[1])
             if pygame.K_RIGHT in self.pressed_keys:
-                self.rect.centerx += 1
-            self.update_image()
+                self.original_center = (self.original_center[0] + 1, self.original_center[1])
+            self.rect.center = (400, 300)
+            self.update_image(False)
         if self.transmit:
             if pygame.K_UP in self.pressed_keys:
                 main.client.action(action_type='up')

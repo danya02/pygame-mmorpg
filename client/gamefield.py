@@ -11,6 +11,8 @@ class GameField:
         self.players = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
+        self.target = None
+        self.pan = (0, 0)
         self.send_message = lambda x: None
 
     def load(self, data):
@@ -46,11 +48,11 @@ class GameField:
         self.npcs.update(data['npcs'], data.get('full', False))
         if len(data['players']) != 0:
             for i in data['players']:
-                    p = entity.Player()  # TODO: create from data
-                    p.id = i['id']
-                    p.rect.centerx = i['x']
-                    p.rect.centery = i['y']
-                    self.players.add(p)
+                p = entity.Player()  # TODO: create from data
+                p.id = i['id']
+                p.rect.centerx = i['x']
+                p.rect.centery = i['y']
+                self.players.add(p)
         if len(data['entities']) != 0:
             for i in data['entities']:
                 p = entity.Entity()  # TODO: create from data
@@ -67,12 +69,15 @@ class GameField:
                 self.npcs.add(p)
 
     def draw(self, surface):
-        surface.blit(self.surface, (0, 0))
-        self.players.update()
+        if isinstance(self.target, entity.Entity):
+            self.pan = (-self.target.original_center[0], -self.target.original_center[1])
+        self.target.rect.center = (400, 300)
+        surface.blit(self.surface, self.pan)
+        self.players.update({'target': self.target})
         self.players.draw(surface)
-        self.npcs.update()
+        self.npcs.update({'target': self.target})
         self.npcs.draw(surface)
-        self.entities.update()
+        self.entities.update({'target': self.target})
         self.entities.draw(surface)
 
     def send_from_player(self, data):
