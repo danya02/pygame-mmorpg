@@ -1,52 +1,21 @@
 #!/usr/bin/python3
-import os
-import tkinter
 import time
-
-import client as module_client
+import connection
+import client
+import effects
 import entity
 import gamefield
-import login
 import window
-import effects
-
-
-class TestClient:
-    def auth(self, usr, passwd):
-        print(usr, passwd)
-        return {'session': 'COOKIE!'}
-
-    def session_auth(self, cookie):
-        print(cookie)
-
-    def action(self, action_type=None):
-        print(action_type)
-
-def auth():
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    try:
-        raise PermissionError
-        with open('.cookie') as i:
-            client.session_auth(i.read())
-    except (FileNotFoundError, PermissionError):
-        root = tkinter.Tk()
-        lf = login.LoginFrame(root)
-        try:
-            root.mainloop()
-        except SystemExit:
-            pass
 
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
-#frame.gamefield.load({'bg':1, 'players':[]})
-if __name__ == '__main__':
-    client = module_client.WSClient(frame.gamefield, 'ws://10.42.0.233:8000')
-#if __name__ == '__main__':
+#frame.gamefield.load({'bg': 1, 'players': []})
+connection.client = client.WSClient(frame.gamefield, "ws://10.42.0.233:8000")
+
+# if __name__ == '__main__':
 #    auth()
 
 if __name__ == '__main__':
-
-
     chara = entity.Player()
     chara.id = 'CHARA'
     chara.standalone = True
@@ -60,23 +29,23 @@ if __name__ == '__main__':
     frame.gamefield.target = chara
     frame.start()
     while 1:
-        n = 200
+        n = -100
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': 200, 'y': n}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': -100, 'y': n}], 'players': [], 'entities': []})
             n += 5
             time.sleep(1 / 30)
-        n = 200
+        n = -100
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': 350}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': 50}], 'players': [], 'entities': []})
             n += 5
             time.sleep(1 / 30)
-        n = 350
+        n = 50
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': 350, 'y': n}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': 50, 'y': n}], 'players': [], 'entities': []})
             n -= 5
             time.sleep(1 / 30)
-        n = 350
+        n = 50
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': 200}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': -100}], 'players': [], 'entities': []})
             n -= 5
             time.sleep(1 / 30)
