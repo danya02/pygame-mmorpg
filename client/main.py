@@ -38,8 +38,9 @@ def auth():
 
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
-frame.gamefield.load({'bg':1, 'players':[]})
-client = TestClient()
+#frame.gamefield.load({'bg':1, 'players':[]})
+if __name__ == '__main__':
+    client = module_client.WSClient(frame.gamefield, 'ws://10.42.0.233:8000')
 #if __name__ == '__main__':
 #    auth()
 
