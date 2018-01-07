@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-import pygame
 import random
-import inventory
+import pygame
 import entity
+import inventory
 
 
 class GameField:
@@ -47,6 +47,7 @@ class GameField:
                 self.npcs.add(p)
 
     def update(self, data):
+
         self.players.update(data['players'], data.get('full', False))
         self.entities.update(data['entities'], data.get('full', False))
         self.npcs.update(data['npcs'], data.get('full', False))

@@ -10,14 +10,17 @@ import window
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
 #frame.gamefield.load({'bg': 1, 'players': []})
-connection.client = client.WSClient(frame.gamefield, "ws://10.42.0.233:8000")
+if __name__ == '__main__':
+    connection.client = client.WSClient(frame.gamefield, "ws://10.42.0.233:8000")
+    time.sleep(1)
+    connection.client.auth('admin', '1234')
 
 # if __name__ == '__main__':
 #    auth()
 
 if __name__ == '__main__':
     chara = entity.Player()
-    chara.id = 'CHARA'
+    chara.id = 1
     chara.standalone = True
     chara.transmit = True
     chara.effects.append(effects.Poison(chara))
@@ -28,6 +31,8 @@ if __name__ == '__main__':
     frame.gamefield.players.add(chara)
     frame.gamefield.target = chara
     frame.start()
+    while 1:
+        pass
     while 1:
         n = -100
         for i in range(30):
