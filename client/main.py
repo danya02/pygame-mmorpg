@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os
 import tkinter
+import time
 
 import client as module_client
 import entity
@@ -26,6 +27,7 @@ def auth():
 
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
+frame.gamefield.load({'bg':1, 'players':[]})
 client = TestClient()
 #if __name__ == '__main__':
 #    auth()
@@ -41,9 +43,8 @@ if __name__ == '__main__':
     frame.on_keypress = chara.on_keypress
     frame.on_keyrelease = chara.on_keyrelease
     frame.gamefield.players.add(chara)
+    frame.gamefield.target = chara
     frame.start()
-    while 1:
-        pass
     while 1:
         n = 200
         for i in range(30):
