@@ -11,6 +11,17 @@ import window
 import effects
 
 
+class TestClient:
+    def auth(self, usr, passwd):
+        print(usr, passwd)
+        return {'session': 'COOKIE!'}
+
+    def session_auth(self, cookie):
+        print(cookie)
+
+    def action(self, action_type=None):
+        print(action_type)
+
 def auth():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
