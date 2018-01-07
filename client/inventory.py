@@ -11,7 +11,7 @@ class Inventory:
         self.selected = 0
 
     def update(self):
-        self.selected = min(len(self.items)-1, self.selected)
+        self.selected = min(len(self.items) - 1, self.selected)
         for i, j in zip(self.items, self.rects):
             i.rect = j
 
@@ -27,3 +27,7 @@ class Inventory:
 
 class Item(pygame.sprite.Sprite):
     pass
+
+
+def get_item(item_id: str) -> Item:
+    return Item()

@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import pygame
 import math
+
+import inventory
 import main
 import effects
 
@@ -37,7 +39,8 @@ class Entity(pygame.sprite.Sprite):
         if data is None:
             self.update_image()
         elif 'target' in data and data['target'] is not self and data['target'] is not None:
-            self.pan = (self.original_center[0]-data['target'].original_center[0], self.original_center[1]-data['target'].original_center[1])
+            self.pan = (self.original_center[0] - data['target'].original_center[0],
+                        self.original_center[1] - data['target'].original_center[1])
             self.update_image()
         else:
             for i in data:
@@ -133,14 +136,17 @@ class Player(Entity):
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
         self.transmit = False
 
-    def load(self, data):
+    def load(self, data: dict) -> None:
+        """
+        Initialize self with data from login process.
+        :param data: the dict that was parsed from json.
+        """
         self.original_center = data['player_info']['x'], data['player_info']['y']
         self.id = data['user_id']
         self.hp = data['player_info']['hp']
         self.direction = data['player_info']['direction']
-        self.effects = [effects.get_effect(i) for i in ['player_info']['effects']]
-
-
+        self.effects = [effects.get_effect(i) for i in data['player_info']['effects']]
+        self.groups()[0].field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
 
     def update(self, data=None, full=False):
         """
@@ -180,8 +186,8 @@ class Player(Entity):
         """
         self.pressed_keys.append(key)
         if key in [eval('pygame.K_{}'.format(str(i))) for i in range(10)]:
-            dict = eval('{'+', '.join(['pygame.K_{}: {}'.format(str(i), str(i-1)) for i in range(10)])+'}')
-            dict.update({pygame.K_0:9})
+            dict = eval('{' + ', '.join(['pygame.K_{}: {}'.format(str(i), str(i - 1)) for i in range(10)]) + '}')
+            dict.update({pygame.K_0: 9})
             self.groups()[0].field.inventory.selected = dict[key]
             if self.transmit:
                 main.client.action('active_item_change', dict[key])
@@ -201,9 +207,9 @@ class Player(Entity):
 
     def on_click(self, pos, button):
         if button == 3:
-            y = abs(pos[1]-300)
-            dist = math.sqrt((400-pos[0])**2+(300-pos[1])**2)
-            cosa = y/dist
+            y = abs(pos[1] - 300)
+            dist = math.sqrt((400 - pos[0]) ** 2 + (300 - pos[1]) ** 2)
+            cosa = y / dist
             angle = math.acos(cosa) * 180 / math.pi
             if self.transmit:
                 main.client.action('action', angle)
