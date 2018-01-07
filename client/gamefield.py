@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pygame
 import random
+import inventory
 
 import entity
 
@@ -11,6 +12,7 @@ class GameField:
         self.players = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
+        self.inventory = inventory.Inventory()
         self.target = None
         self.pan = (0, 0)
         self.send_message = lambda x: None
@@ -79,6 +81,7 @@ class GameField:
         self.npcs.draw(surface)
         self.entities.update({'target': self.target})
         self.entities.draw(surface)
+        self.inventory.draw(surface)
 
     def send_from_player(self, data):
         self.send_message(data)

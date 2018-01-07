@@ -44,8 +44,6 @@ client = TestClient()
 #    auth()
 
 if __name__ == '__main__':
-
-
     chara = entity.Player()
     chara.id = 'CHARA'
     chara.standalone = True
@@ -59,23 +57,23 @@ if __name__ == '__main__':
     frame.gamefield.target = chara
     frame.start()
     while 1:
-        n = 200
+        n = -100
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': 200, 'y': n}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': -100, 'y': n}], 'players': [], 'entities': []})
             n += 5
             time.sleep(1 / 30)
-        n = 200
+        n = -100
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': 350}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': 50}], 'players': [], 'entities': []})
             n += 5
             time.sleep(1 / 30)
-        n = 350
+        n = 50
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': 350, 'y': n}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': 50, 'y': n}], 'players': [], 'entities': []})
             n -= 5
             time.sleep(1 / 30)
-        n = 350
+        n = 50
         for i in range(30):
-            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': 200}], 'players': [], 'entities': []})
+            frame.gamefield.update({'npcs': [{'id': 'Dummy1', 'x': n, 'y': -100}], 'players': [], 'entities': []})
             n -= 5
             time.sleep(1 / 30)
