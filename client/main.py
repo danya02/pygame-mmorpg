@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os
 import tkinter
+import time
 
 import client as module_client
 import entity
@@ -9,6 +10,17 @@ import login
 import window
 import effects
 
+
+class TestClient:
+    def auth(self, usr, passwd):
+        print(usr, passwd)
+        return {'session': 'COOKIE!'}
+
+    def session_auth(self, cookie):
+        print(cookie)
+
+    def action(self, action_type=None):
+        print(action_type)
 
 def auth():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -26,6 +38,7 @@ def auth():
 
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
+frame.gamefield.load({'bg':1, 'players':[]})
 client = TestClient()
 #if __name__ == '__main__':
 #    auth()
@@ -40,10 +53,11 @@ if __name__ == '__main__':
     chara.effects.append(effects.Poison(chara))
     frame.on_keypress = chara.on_keypress
     frame.on_keyrelease = chara.on_keyrelease
+    frame.on_click = chara.on_click
+    frame.on_unclick = chara.on_unclick
     frame.gamefield.players.add(chara)
+    frame.gamefield.target = chara
     frame.start()
-    while 1:
-        pass
     while 1:
         n = 200
         for i in range(30):

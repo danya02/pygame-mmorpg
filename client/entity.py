@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pygame
+import math
 import main
 import effects
 
@@ -14,6 +15,8 @@ class Entity(pygame.sprite.Sprite):
         self.image = pygame.Surface((1, 1))
         self.original_image = pygame.Surface((1, 1))
         self.rect = self.image.get_rect()
+        self.original_center = (0, 0)
+        self.pan = (0, 0)
         self.direction = 2
         self.walk_phase = 0
         self.sprites = [[pygame.Surface((1, 1))]] * 4
@@ -33,6 +36,9 @@ class Entity(pygame.sprite.Sprite):
         """
         if data is None:
             self.update_image()
+        elif 'target' in data and data['target'] is not self and data['target'] is not None:
+            self.pan = (self.original_center[0]-data['target'].original_center[0], self.original_center[1]-data['target'].original_center[1])
+            self.update_image()
         else:
             for i in data:
                 if i['id'] == self.id:
@@ -41,8 +47,8 @@ class Entity(pygame.sprite.Sprite):
             else:
                 self.kill()
                 return None
-            deltax = mydata['x'] - self.rect.centerx
-            deltay = mydata['y'] - self.rect.centery
+            deltax = mydata['x'] - self.original_center[0]
+            deltay = mydata['y'] - self.original_center[1]
             if deltax > 0:
                 self.direction = 1
             if deltax < 0:
@@ -52,15 +58,17 @@ class Entity(pygame.sprite.Sprite):
             if deltay < 0:
                 self.direction = 0
             self.walking = abs(deltax) + abs(deltay) > 0
-            self.rect.centerx = mydata['x']
-            self.rect.centery = mydata['y']
+            self.original_center = mydata['x'], mydata['y']
             return mydata
 
-    def update_image(self):
+    def update_image(self, target=True):
         for i in self.effects:
             i.target = self
             if not i.running:
                 i.start()
+        if target:
+            self.rect.centerx = self.original_center[0] + self.pan[0]
+            self.rect.centery = self.original_center[1] + self.pan[1]
         if self.walking:
             self.walk_tick_phase += 1
         if self.walk_tick_phase >= self.walk_tick_delay:
@@ -68,10 +76,10 @@ class Entity(pygame.sprite.Sprite):
             self.walk_phase += 1
         if self.walk_phase >= len(self.sprites[self.direction]):
             self.walk_phase = 0
-        center = self.rect.center
+        target = self.rect.center
         self.original_image = self.sprites[self.direction][self.walk_phase]
         self.rect = self.image.get_rect()
-        self.rect.center = center
+        self.rect.center = target
 
     def update_walking(self) -> bool:
         """
@@ -117,12 +125,22 @@ class Player(Entity):
         That includes the player at this computer.
         """
         super().__init__()
+        self.hp = 100
         self.walk_tick_delay = 150
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
         self.sprites = [[zoom(pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))), 2) for i in
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
         self.transmit = False
+
+    def load(self, data):
+        self.original_center = data['player_info']['x'], data['player_info']['y']
+        self.id = data['user_id']
+        self.hp = data['player_info']['hp']
+        self.direction = data['player_info']['direction']
+        self.effects = [effects.get_effect(i) for i in ['player_info']['effects']]
+
+
 
     def update(self, data=None, full=False):
         """
@@ -136,14 +154,15 @@ class Player(Entity):
             super().update(data, full)
         else:
             if pygame.K_UP in self.pressed_keys:
-                self.rect.centery -= 1
+                self.original_center = (self.original_center[0], self.original_center[1] - 1)
             if pygame.K_DOWN in self.pressed_keys:
-                self.rect.centery += 1
+                self.original_center = (self.original_center[0], self.original_center[1] + 1)
             if pygame.K_LEFT in self.pressed_keys:
-                self.rect.centerx -= 1
+                self.original_center = (self.original_center[0] - 1, self.original_center[1])
             if pygame.K_RIGHT in self.pressed_keys:
-                self.rect.centerx += 1
-            self.update_image()
+                self.original_center = (self.original_center[0] + 1, self.original_center[1])
+            self.rect.center = (400, 300)
+            self.update_image(False)
         if self.transmit:
             if pygame.K_UP in self.pressed_keys:
                 main.client.action(action_type='up')
@@ -173,3 +192,15 @@ class Player(Entity):
         except ValueError:
             pass
         self.update_walking()
+
+    def on_click(self, pos, button):
+        if button == 3:
+            y = abs(pos[1]-300)
+            dist = math.sqrt((400-pos[0])**2+(300-pos[1])**2)
+            cosa = y/dist
+            angle = math.acos(cosa) * 180 / math.pi
+            if self.transmit:
+                main.client.action('action', angle)
+
+    def on_unclick(self, pos, button):
+        pass

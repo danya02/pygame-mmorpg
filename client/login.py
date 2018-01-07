@@ -5,7 +5,7 @@ import main
 
 
 class LoginFrame(Frame):
-    def __init__(self, master):
+    def __init__(self, master, callback):
         """
         Basic Tkinter frame for login and password entry.
         :param master: root of this frame.
@@ -25,19 +25,30 @@ class LoginFrame(Frame):
         self.checkbox = Checkbutton(self, text="Keep me logged in")
         self.checkbox.grid(columnspan=2)
 
-        self.logbtn = Button(self, text="Login", command = self._login_btn_clicked)
+        self.logbtn = Button(self, text="Login", command=self._login_btn_clicked)
         self.logbtn.grid(columnspan=2)
 
         self.pack()
+        self.callback = callback
 
     def _login_btn_clicked(self) -> None:
         """
-        On clik of button.
+        On click of button.
         """
         username = self.entry_1.get()
         password = self.entry_2.get()
         client = main.client
-        client.auth(username, password)
+        client.auth(username, password, self._login_callback)
+
+    def _login_callback(self, result: dict) -> None:
+        """
+        For when the async login has completed.
+        :param result: The returned dict of data.
+        """
+        if result['type'] == 'auth_ok':
+            self.callback(result['data'])
+        else:
+            tm.showerror("Wrong credentials!", "The username and/or password given was incorrect. Please try again.")
 
 
 if __name__ == '__main__':
