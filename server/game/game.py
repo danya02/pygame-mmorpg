@@ -52,10 +52,10 @@ class Player(game.models.NPC):
         elif act == 'action':
             if not self.active_item:
                 return
-            if data:
-                self.active_item.action(data)
+            if data is not None:
+                self.active_item.action(self, data)
             else:
-                self.active_item.action()
+                self.active_item.action(self)
         elif act == 'active_item_change':
             try:
                 self.active_item = self.inventory[data]
@@ -142,7 +142,7 @@ class Field:
     def spawn_entity(self, entity, x, y, speed_x, speed_y):
         entity.rect.x = x
         entity.rect.y = y
-        entity.speed_x = speed_x,
+        entity.speed_x = speed_x
         entity.speed_y = speed_y
         self.entities.append(entity)
 
@@ -212,8 +212,8 @@ class Game(threading.Thread):
                         'y': player.rect.y,
                         'hp': player.hp,
                         'user_info': player.user.get_information(),
-                        'active_item': player.active_item,
-                        'inventory': player.inventory,
+                        'active_item': player.active_item.id,
+                        'inventory': list(map(lambda x: x.id, player.inventory)),
                         'effects': [
                             {
                                 'id': effect.id,
@@ -251,4 +251,4 @@ class Game(threading.Thread):
                 ]
             }
             self.channel.send({'type': 'tick', 'data': data})
-            time.sleep(TICK - time.time() + t)
+            # time.sleep(TICK - time.time() + t)

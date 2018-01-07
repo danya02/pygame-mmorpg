@@ -65,5 +65,5 @@ class FireStaff(Weapon):
         super(FireStaff, self).action(player)
         speed_y = FireBall.speed * math.cos(angle)
         speed_x = FireBall.speed * math.sin(angle)
-        self.field.spawn_entity(FireBall(self.field, self.rect, self.owner),
+        self.field.spawn_entity(FireBall(self.rect, self.field, self.owner),
                                 player.rect.x, player.rect.y, speed_x, speed_y)

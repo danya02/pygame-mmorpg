@@ -6,14 +6,16 @@ class Ball(Entity):
     id = '150'
     speed = 5
 
-    def __init__(self, field, rect, owner):
-        super(Ball, self).__init__(field, rect)
+    def __init__(self, rect, field, owner):
+        super(Ball, self).__init__(rect, field)
 
         self.damage_value = 20
         self.effect = None
         self.owner = owner
 
     def collide_action(self, lst):
+        if len(lst) == 0:
+            return
         target = lst[0]
         if (target.type == 'npc') and (target != self.owner):
             target.hp -= self.damage_value
@@ -24,5 +26,5 @@ class Ball(Entity):
 class FireBall(Ball):
     id = '150:1'
 
-    def __init__(self, field, rect, owner):
-        super(FireBall, self).__init__(field, rect, owner)
+    def __init__(self, rect, field, owner):
+        super(FireBall, self).__init__(rect, field, owner)

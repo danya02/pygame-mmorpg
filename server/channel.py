@@ -20,8 +20,8 @@ class Channel:
         for handler in self.handlers:
             try:
                 handler.ws_send(json.dumps(data))
-            except:
-                pass
+            except Exception as ex:
+                print(ex)
 
     def send_pm(self, data, users):
         """

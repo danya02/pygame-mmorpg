@@ -21,11 +21,11 @@ class Object:
 
         self.moving = True
 
-        move_x = self.rect.move(self.speed_x, 0)
+        move_x = self.rect.move(int(self.speed_x), 0)
         if not self.check_collide(move_x):
             self.rect = move_x
 
-        move_y = self.rect.move(0, self.speed_y)
+        move_y = self.rect.move(0, int(self.speed_y))
         if not self.check_collide(move_y):
             self.rect = move_y
 
