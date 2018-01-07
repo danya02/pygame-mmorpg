@@ -185,7 +185,7 @@ class Player(Entity):
 
     def on_click(self, pos, button):
         if button == 3:
-            v = abs(pos[1]-300)
+            y = abs(pos[1]-300)
             dist = math.sqrt((400-pos[0])**2+(300-pos[1])**2)
             cosa = y/dist
             angle = math.acos(cosa) * 180 / math.pi
