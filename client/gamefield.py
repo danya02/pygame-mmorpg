@@ -12,6 +12,9 @@ class GameField:
         self.players = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
+        self.players.field = self
+        self.entities.field = self
+        self.npcs.field = self
         self.inventory = inventory.Inventory()
         self.target = None
         self.pan = (0, 0)

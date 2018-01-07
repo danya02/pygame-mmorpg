@@ -169,6 +169,12 @@ class Player(Entity):
         :param key: the key that was pressed's ID.
         """
         self.pressed_keys.append(key)
+        if key in [eval('pygame.K_{}'.format(str(i))) for i in range(10)]:
+            dict = eval('{'+', '.join(['pygame.K_{}: {}'.format(str(i), str(i-1)) for i in range(10)])+'}')
+            dict.update({pygame.K_0:9})
+            self.groups()[0].field.inventory.selected = dict[key]
+            if self.transmit:
+                main.client.action('active_item_change', dict[key])
         self.update_walking()
 
     def on_keyrelease(self, key) -> None:

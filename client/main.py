@@ -19,8 +19,8 @@ class TestClient:
     def session_auth(self, cookie):
         print(cookie)
 
-    def action(self, action_type=None):
-        print(action_type)
+    def action(self, action_type=None, action_data=None):
+        print(action_type, action_data)
 
 def auth():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
