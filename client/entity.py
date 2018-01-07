@@ -125,12 +125,22 @@ class Player(Entity):
         That includes the player at this computer.
         """
         super().__init__()
+        self.hp = 100
         self.walk_tick_delay = 150
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
         self.sprites = [[zoom(pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))), 2) for i in
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
         self.transmit = False
+
+    def load(self, data):
+        self.original_center = data['player_info']['x'], data['player_info']['y']
+        self.id = data['user_id']
+        self.hp = data['player_info']['hp']
+        self.direction = data['player_info']['direction']
+        self.effects = [effects.get_effect(i) for i in ['player_info']['effects']]
+
+
 
     def update(self, data=None, full=False):
         """
