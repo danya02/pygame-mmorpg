@@ -32,6 +32,7 @@ class Handler(WebSocketServerProtocol):
         self.logger = logging.getLogger('WSServer')
         self.player_info = {}
         self.game = main_game
+        self.me = None
 
     def ws_send(self, message):
         data = gzip.compress(message.encode('utf-8'))
@@ -89,6 +90,8 @@ class Handler(WebSocketServerProtocol):
                 traceback.print_exc()
         else:
             resp = commands.error(None)
+        if message.get('id'):
+            resp['id'] = message['id']
         self.ws_send(json.dumps(resp))
 
     def onClose(self, *args):

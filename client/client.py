@@ -5,6 +5,8 @@ import websocket
 import gzip
 import threading
 import json
+import pygame
+import uuid
 
 
 class WSClient(threading.Thread):
@@ -20,6 +22,7 @@ class WSClient(threading.Thread):
         )
         self.ws_connection.keep_running = True
         self.start()
+        self.call_backs = {}
 
     def send_message(self, data):
         """
@@ -32,14 +35,21 @@ class WSClient(threading.Thread):
 
     def on_message(self, _, data):
         data = gzip.decompress(data)
-        data = json.loads(data.decode('utf-8'))
-        typ = data['type']
-        data = data['data']
+        msg = json.loads(data.decode('utf-8'))
+        typ = msg['type']
+        data = msg['data']
+        if msg.get('id'):
+            self.call_backs[msg['id']](data)
+            self.call_backs.pop(msg['id'])
+            return
         if typ == 'auth_ok':
             with open('.cookie', 'w') as o:
                 o.write(data['session'])
         elif typ == 'tick':
             self.field.update(data)
+        elif typ == 'image':
+            s = pygame.image.fromstring(data['src'], data['size'], 'RGBA')
+            pygame.image.save(s, 'sprites/' + data['name'])
         else:
             print(typ, data)
 
@@ -57,3 +67,8 @@ class WSClient(threading.Thread):
 
     def session_auth(self, session):
         self.send_message({'type': 'session_auth', 'data': {'session': session}})
+
+    def get_image(self, data, func):
+        rand = str(uuid.uuid4())
+        self.send_message({'type': 'get_image', 'data': data, 'id': rand})
+        self.call_backs[rand] = func

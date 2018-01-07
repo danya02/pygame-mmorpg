@@ -211,17 +211,24 @@ def leave(self, _):
         return {'type': 'leave_ok', 'data': ''}
     self.game.delete_player(self)
     self.player_info = {
-        'inventory': self.me.inventory,
-        'effects': self.me.effects,
+        'inventory': list(map(lambda x: x.id, self.me.inventory)),
+        'effects': list(map(lambda x: x.id, self.me.effects)),
         'hp': self.me.hp,
-        'x': self.me.x,
-        'y': self.me.y,
+        'x': self.me.rect.x,
+        'y': self.me.rect.y,
         'direction': self.me.direction,
-        'active_item': self.me.active_item,
+        'active_item': self.me.active_item.id,
     }
+    self.temp.users[self.user]['player_info'] = self.player_info
     self.me = None
-    self.db.db_save_all()
+    self.game = None
+    self.temp.db_save_all()
     return {'type': 'leave_ok', 'data': ''}
+
+
+@perms_check(0)
+def get_image(self, data):
+    return {'type': 'img', 'data': self.game.get_img(data)}
 
 
 @perms_check(0)

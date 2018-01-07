@@ -1,4 +1,5 @@
 from pygame import Rect
+from .config import *
 
 
 class Object:
@@ -49,7 +50,6 @@ class Object:
 
 
 class Entity(Object):
-    id = '150'
     type = 'entity'
 
     def __init__(self, rect, field):
@@ -62,21 +62,23 @@ class Entity(Object):
         if self.touchable:
             objects = self.field.objects + self.field.players + self.field.npc + self.field.entities
             objects.remove(self)
-            self.action([objects[i] for i in self.rect.collidelistall(list(map(lambda x: x.rect,
-                                                                               filter(lambda x: x.collide, objects))))])
+            self.collide_action([objects[i] for i in self.rect.collidelistall(list(map(lambda x: x.rect,
+                                                                                       filter(lambda x: x.collide,
+                                                                                              objects))))])
 
-    def action(self, *_):
+    def collide_action(self, *_):
         pass
 
 
 class Item(Entity):
-    id = '50'
     type = 'item'
 
-    def __init__(self, rect, field):
+    def __init__(self, rect, field, owner):
         super(Item, self).__init__(rect, field)
         self.dropped = False
         self.name = None
+
+        self.owner = owner
 
         self.action_delay = 15
         self.last_action_tick = 0
@@ -86,24 +88,36 @@ class Item(Entity):
             return
         self.last_action_tick = self.field.tick
 
-        # Override your action
+    def collide_action(self, players):
+        if not self.dropped:
+            return
+        player = players[0]
+        if len(player.inventory) <= MAX_ITEMS:
+            player.get_item(self)
 
 
 class Weapon(Item):
-    def __init__(self, field):
+    def __init__(self, field, owner):
         self.width = 10
         self.height = 15
 
-        super(Weapon, self).__init__(Rect(0, 0, self.width, self.height), field)
+        super(Weapon, self).__init__(Rect(0, 0, self.width, self.height), field, owner)
         self.damage_value = 0
-        self.damage_radius = 20
+        self.damage_radius = 40
+
+    def hit(self):
+        npcs = self.field.npc + self.field.players
+        npcs.remove(self)
+        for npc in npcs:
+            if (abs(npc.rect.x - self.rect.x) < self.damage_radius) \
+                    and (abs(npc.rect.y - self.rect.y) < self.damage_radius):
+                self.damage(npc)
 
     def damage(self, npc):
         npc.hp -= self.damage_value
 
 
 class Effect:
-    id = '100'
     type = 'effect'
 
     def __init__(self, npc, ticks, delay):
@@ -138,9 +152,17 @@ class NPC(Object):
         else:
             item.dropped = True
             self.field.entities.append(item)
-            item.rect.x, item.rect.y = self.rect.x, self.rect.y
+            if self.rect.y <= 70:
+                item.rect.x, item.rect.y = self.rect.x, self.rect.y - 50
+            else:
+                item.rect.x, item.rect.y = self.rect.x, self.rect.y + 70
 
     def update(self):
         super(NPC, self).update()
         for effect in self.effects:
             effect.update()
+        if self.hp <= 0:
+            self.kill()
+
+    def kill(self):
+        self.field.npc.remove(self)

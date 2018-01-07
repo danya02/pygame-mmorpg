@@ -1,13 +1,14 @@
 from .models import *
 from .effects import *
 from .entities import *
+import math
 
 
 class Sword(Weapon):
     id = '50'
 
-    def __init__(self, field):
-        super(Sword, self).__init__(field)
+    def __init__(self, field, owner):
+        super(Sword, self).__init__(field, owner)
 
         self.damage_value = 10
 
@@ -15,8 +16,8 @@ class Sword(Weapon):
 class UltimateSword(Sword):
     id = '50:1'
 
-    def __init__(self, field):
-        super(UltimateSword, self).__init__(field)
+    def __init__(self, field, owner):
+        super(UltimateSword, self).__init__(field, owner)
 
         self.damage_value = 50
 
@@ -24,8 +25,8 @@ class UltimateSword(Sword):
 class PoisonSword(Sword):
     id = '50:2'
 
-    def __init__(self, field):
-        super(PoisonSword, self).__init__(field)
+    def __init__(self, field, owner):
+        super(PoisonSword, self).__init__(field, owner)
 
         self.damage_value = 20
 
@@ -37,8 +38,8 @@ class PoisonSword(Sword):
 class HealingSword(Sword):
     id = '50:3'
 
-    def __init__(self, field):
-        super(HealingSword, self).__init__(field)
+    def __init__(self, field, owner):
+        super(HealingSword, self).__init__(field, owner)
 
         self.damage_value = -1
         self.action_delay = 5
@@ -47,7 +48,7 @@ class HealingSword(Sword):
         super(HealingSword, self).damage(npc)
         self.field.add_effect(HealingEffect(npc, 5))
 
-    def action(self, player):
+    def action(self, player, *_):
         super(HealingSword, self).action(player)
         player.hp += 1
 
@@ -55,11 +56,14 @@ class HealingSword(Sword):
 class FireStaff(Weapon):
     id = '51'
 
-    def __init__(self, field):
-        super(FireStaff, self).__init__(field)
+    def __init__(self, field, owner):
+        super(FireStaff, self).__init__(field, owner)
 
         self.damage_value = 5
 
-    def action(self, player):
+    def action(self, player, angle):
         super(FireStaff, self).action(player)
-        self.field.spawn_entity(FireBall(self.field, self.rect), player.rect.x, player.rect.y, player.speed_x)  # TODO: Speed
+        speed_y = FireBall.speed * math.cos(angle)
+        speed_x = FireBall.speed * math.sin(angle)
+        self.field.spawn_entity(FireBall(self.field, self.rect, self.owner),
+                                player.rect.x, player.rect.y, speed_x, speed_y)

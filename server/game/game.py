@@ -9,6 +9,7 @@ import threading
 import time
 import pygame
 from pygame import Rect
+import random
 
 
 class Player(game.models.NPC):
@@ -23,6 +24,15 @@ class Player(game.models.NPC):
         self.speed_x = self.speed_y = 0
         self.direction = direction
 
+    def kill(self):
+        self.field.channel.send_pm({'type': 'dead', 'data': 'You dead.'}, self.name)
+        self.rect.x = random.randint(0, self.field.width)
+        self.rect.y = random.randint(0, self.field.height)
+        self.hp = 100
+        for item in self.inventory.copy():
+            self.drop_item(item)
+        self.drop_item(self.active_item)
+
     def action(self, act, data):
         if act == 'left':
             self.speed_x = -PLAYER_SPEED
@@ -36,6 +46,26 @@ class Player(game.models.NPC):
         elif act == 'down':
             self.speed_y = PLAYER_SPEED
             self.direction = 2
+        elif act == 'hit':
+            if self.active_item:
+                self.active_item.hit()
+        elif act == 'action':
+            if not self.active_item:
+                return
+            if data:
+                self.active_item.action(data)
+            else:
+                self.active_item.action()
+        elif act == 'active_item_change':
+            try:
+                self.active_item = self.inventory[data]
+            except IndexError:
+                self.active_item = None
+        elif act == 'drop':
+            if not self.active_item:
+                return
+            self.drop_item(self.active_item)
+            self.active_item = None
 
     def drop_item(self, item):
         """
@@ -64,9 +94,12 @@ class Player(game.models.NPC):
                 return
             self.get_item(entity)
             return
+        item.owner = self
         self.inventory.append(item)
         self.field.entities.remove(item)
         item.dropped = False
+        item.rect.x = -1
+        item.rect.y = -1
 
     def update(self):
         super(Player, self).update()
@@ -75,8 +108,9 @@ class Player(game.models.NPC):
 
 
 class Field:
-    def __init__(self):
+    def __init__(self, channel):
         self.objects = []
+        self.channel = channel
 
         self.players = []
         self.npc = []
@@ -96,8 +130,12 @@ class Field:
             entity.update()
         self.tick += 1
 
-    def add_player(self, x, y, hp, inventory, active_item, direction, user):
+    def add_player(self, x, y, hp, inventory, direction, active_item, user):
         player = Player(x, y, hp, inventory, direction, active_item, self, user)
+        for i in range(len(player.inventory)):
+            player.inventory[i] = player.inventory[i](self, player)
+        if active_item:
+            player.active_item = player.active_item(self, player)
         self.players.append(player)
         return player
 
@@ -124,6 +162,8 @@ class Field:
             return False
 
     def get_object_by_id(self, item_id):
+        if not item_id:
+            return
         if type(item_id) == list:
             return [self.get_object_by_id(i) for i in item_id]
         all_objects = list(filter(lambda x: self.get_attr(x),
@@ -136,11 +176,14 @@ class Game(threading.Thread):
     def __init__(self, channel):
         threading.Thread.__init__(self, target=self.run)
         self.channel = channel
-        self.field = Field()
+        self.field = Field(channel)
 
     def add_player(self, user):
         inventory = self.field.get_object_by_id(user.player_info['inventory'])
-        active_item = self.field.get_object_by_id(user.player_info['active_item'])
+        if user.player_info['active_item']:
+            active_item = self.field.get_object_by_id(user.player_info['active_item'])
+        else:
+            active_item = None
         return self.field.add_player(user.player_info['x'], user.player_info['y'],
                                      user.player_info['hp'], inventory,
                                      active_item, user.player_info['direction'], user)
@@ -150,14 +193,17 @@ class Game(threading.Thread):
         self.channel.send({'type': 'player_left', 'data': ''})
 
     @staticmethod
-    def get_img(img):
+    def get_img(name):
+        s = pygame.image.load('game/src/img/' + name)
         return {
-                'src': str(pygame.image.tostring(img, 'RGBA')),
-                'size': img.get_size()
+            'name': name,
+            'src': str(pygame.image.tostring(s, 'RGBA')),
+            'size': s.get_size()
         }
 
     def run(self):
         while True:
+            t = time.time()
             self.field.do_tick()
             data = {
                 'players': [
@@ -166,6 +212,8 @@ class Game(threading.Thread):
                         'y': player.rect.y,
                         'hp': player.hp,
                         'user_info': player.user.get_information(),
+                        'active_item': player.active_item,
+                        'inventory': player.inventory,
                         'effects': [
                             {
                                 'id': effect.id,
@@ -203,4 +251,4 @@ class Game(threading.Thread):
                 ]
             }
             self.channel.send({'type': 'tick', 'data': data})
-            time.sleep(TICK)
+            time.sleep(TICK - time.time() + t)
