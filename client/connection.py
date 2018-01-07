@@ -34,4 +34,3 @@ def auth():
         except SystemExit:
             pass
 
-client = TestClient()

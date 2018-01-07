@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import time
 import connection
+import client
 import effects
 import entity
 import gamefield
@@ -8,7 +9,8 @@ import window
 
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
-frame.gamefield.load({'bg': 1, 'players': []})
+#frame.gamefield.load({'bg': 1, 'players': []})
+connection.client = client.WSClient(frame.gamefield, "ws://10.42.0.233:8000")
 
 # if __name__ == '__main__':
 #    auth()
