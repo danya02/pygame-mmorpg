@@ -108,6 +108,8 @@ class Player(game.models.NPC):
 
 
 class Field:
+    type = 'field'
+
     def __init__(self, channel):
         self.objects = []
         self.channel = channel
@@ -211,7 +213,7 @@ class Game(threading.Thread):
                         'x': player.rect.x,
                         'y': player.rect.y,
                         'hp': player.hp,
-                        'user_info': player.user.get_information(),
+                        'id': player.user.user_id,
                         'active_item': player.active_item.id,
                         'inventory': list(map(lambda x: x.id, player.inventory)),
                         'effects': [
@@ -251,4 +253,5 @@ class Game(threading.Thread):
                 ]
             }
             self.channel.send({'type': 'tick', 'data': data})
-            # time.sleep(TICK - time.time() + t)
+            if TICK - time.time() + t > 0:
+                time.sleep(TICK - time.time() + t)

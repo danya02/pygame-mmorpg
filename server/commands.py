@@ -231,6 +231,14 @@ def get_image(self, data):
     return {'type': 'img', 'data': self.game.get_img(data)}
 
 
+@perms_check(5)
+def player_add_effect(self, data):
+    for player in self.game.field.players:
+        if player.name == data['name']:
+            effect = self.game.field.get_object_by_id(data['id'])
+            self.game.field.add_effect(effect(self.me, data['ticks']))
+
+
 @perms_check(0)
 def ping(_, data):
     """

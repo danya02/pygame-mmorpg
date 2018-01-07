@@ -105,12 +105,18 @@ class Weapon(Item):
         self.damage_value = 0
         self.damage_radius = 40
 
+        self.damage_delay = 15
+        self.last_damage_tick = 0
+
     def hit(self):
+        if self.field.tick - self.last_damage_tick < self.damage_delay:
+            return
+        self.last_damage_tick = self.field.tick
         npcs = self.field.npc + self.field.players
         npcs.remove(self)
         for npc in npcs:
-            if (abs(npc.rect.x - self.rect.x) < self.damage_radius) \
-                    and (abs(npc.rect.y - self.rect.y) < self.damage_radius):
+            if (abs(npc.rect.center[0] - self.rect.center[0]) < self.damage_radius) \
+                    and (abs(npc.rect.center[1] - self.rect.center[1]) < self.damage_radius):
                 self.damage(npc)
 
     def damage(self, npc):
