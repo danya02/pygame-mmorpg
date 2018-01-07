@@ -2,7 +2,6 @@
 import pygame
 import random
 import inventory
-
 import entity
 
 

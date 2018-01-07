@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pygame
+import connection
 
 
 class Inventory:
@@ -11,9 +12,11 @@ class Inventory:
         self.selected = 0
 
     def update(self):
+        for i in self.items:
+            i.inventory = self
         self.selected = min(len(self.items) - 1, self.selected)
         for i, j in zip(self.items, self.rects):
-            i.rect = j
+            i.rect.center = j.center
 
     def draw(self, surface):
         for i in self.rects:
@@ -26,8 +29,26 @@ class Inventory:
 
 
 class Item(pygame.sprite.Sprite):
-    pass
+    def __init__(self, item_id):
+        super().__init__()
+        self.id = item_id
+        self.image = pygame.image.load('sprites/null_item.png')
+        self.rect = self.image.get_rect()
+        self.inventory = None
+
+    def get_image(self):
+        if self.inventory is not None:
+            try:
+                self.image = pygame.image.load('sprites/{}.png'.format(self.id))
+            except pygame.error:
+                connection.client.get_image(self.id+'.png')
+                pass
+
+    def set_image(self, data):
+        self.image = pygame.image.fromstring(eval(data['src']), tuple(data['size']))
+        self.rect = self.image.get_rect()
+        self.inventory.update()
 
 
 def get_item(item_id: str) -> Item:
-    return Item()
+    return Item(item_id)

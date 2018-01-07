@@ -3,7 +3,7 @@ import pygame
 import math
 
 import inventory
-import main
+import connection
 import effects
 
 
@@ -171,13 +171,13 @@ class Player(Entity):
             self.update_image(False)
         if self.transmit:
             if pygame.K_UP in self.pressed_keys:
-                main.client.action(action_type='up')
+                connection.client.action(action_type='up')
             if pygame.K_DOWN in self.pressed_keys:
-                main.client.action(action_type='down')
+                connection.client.action(action_type='down')
             if pygame.K_LEFT in self.pressed_keys:
-                main.client.action(action_type='left')
+                connection.client.action(action_type='left')
             if pygame.K_RIGHT in self.pressed_keys:
-                main.client.action(action_type='right')
+                connection.client.action(action_type='right')
 
     def on_keypress(self, key) -> None:
         """
@@ -190,7 +190,7 @@ class Player(Entity):
             dict.update({pygame.K_0: 9})
             self.groups()[0].field.inventory.selected = dict[key]
             if self.transmit:
-                main.client.action('active_item_change', dict[key])
+                connection.client.action('active_item_change', dict[key])
         self.update_walking()
 
     def on_keyrelease(self, key) -> None:
@@ -212,7 +212,7 @@ class Player(Entity):
             cosa = y / dist
             angle = math.acos(cosa) * 180 / math.pi
             if self.transmit:
-                main.client.action('action', angle)
+                connection.client.action('action', angle)
 
     def on_unclick(self, pos, button):
         pass

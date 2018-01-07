@@ -1,53 +1,15 @@
 #!/usr/bin/python3
-import os
-import tkinter
 import time
-
-import pygame
-
-import client as module_client
+import connection
+import effects
 import entity
 import gamefield
-import login
 import window
-import effects
-
-
-class TestClient:
-    def auth(self, usr, passwd):
-        print(usr, passwd)
-        return {'session': 'COOKIE!'}
-
-    def session_auth(self, cookie):
-        print(cookie)
-
-    def action(self, action_type=None, action_data=None):
-        print(action_type, action_data)
-
-    def get_image(self, name, callback):
-        print(name)
-        callback({"name": name, "size": (1, 1), "src": str(pygame.image.tostring(pygame.Surface((1, 1)), "RGBA"))})
-
-
-def auth():
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    try:
-        raise PermissionError
-        with open('.cookie') as i:
-            client.session_auth(i.read())
-    except (FileNotFoundError, PermissionError):
-        root = tkinter.Tk()
-        lf = login.LoginFrame(root)
-        try:
-            root.mainloop()
-        except SystemExit:
-            pass
-
 
 frame = window.Window()
 frame.gamefield = gamefield.GameField()
 frame.gamefield.load({'bg': 1, 'players': []})
-client = TestClient()
+
 # if __name__ == '__main__':
 #    auth()
 
