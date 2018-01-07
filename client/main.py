@@ -42,6 +42,8 @@ if __name__ == '__main__':
     chara.effects.append(effects.Poison(chara))
     frame.on_keypress = chara.on_keypress
     frame.on_keyrelease = chara.on_keyrelease
+    frame.on_click = chara.on_click
+    frame.on_unclick = chara.on_unclick
     frame.gamefield.players.add(chara)
     frame.gamefield.target = chara
     frame.start()

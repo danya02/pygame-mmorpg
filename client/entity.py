@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pygame
+import math
 import main
 import effects
 
@@ -181,3 +182,15 @@ class Player(Entity):
         except ValueError:
             pass
         self.update_walking()
+
+    def on_click(self, pos, button):
+        if button == 3:
+            v = abs(pos[1]-300)
+            dist = math.sqrt((400-pos[0])**2+(300-pos[1])**2)
+            cosa = y/dist
+            angle = math.acos(cosa) * 180 / math.pi
+            if self.transmit:
+                main.client.action('action', angle)
+
+    def on_unclick(self, pos, button):
+        pass

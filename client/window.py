@@ -13,6 +13,8 @@ class Window(threading.Thread):
         self.display = pygame.display.set_mode((800, 600))
         self.on_keypress = lambda x: None
         self.on_keyrelease = lambda x: None
+        self.on_click = lambda x, y: None
+        self.on_unclick = lambda x, y: None
         self.last_pressed = pygame.key.get_pressed()
         self.gamefield = None
 
@@ -30,3 +32,7 @@ class Window(threading.Thread):
                     self.on_keypress(i.key)
                 elif i.type == pygame.KEYUP:
                     self.on_keyrelease(i.key)
+                elif i.type == pygame.MOUSEBUTTONDOWN:
+                    self.on_click(i.pos, i.button)
+                elif i.type == pygame.MOUSEBUTTONUP:
+                    self.on_unclick(i.pos, i.button)
