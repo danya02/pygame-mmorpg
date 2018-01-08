@@ -22,6 +22,7 @@ def sync(func):
 class WSClient(threading.Thread):
     def __init__(self, field, url='ws://92.63.105.60:8000', debug=True):
         threading.Thread.__init__(self, target=self.run)
+        self.name = "Websocket client"
         self.field = field
         self.url = url
         self.ws_connection = websocket.WebSocketApp(

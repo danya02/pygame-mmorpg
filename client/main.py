@@ -11,7 +11,7 @@ frame = window.Window()
 frame.gamefield = gamefield.GameField()
 #frame.gamefield.load({'bg': 1, 'players': []})
 if __name__ == '__main__':
-    connection.client = client.WSClient(frame.gamefield, "ws://localhost:8000")
+    connection.client = client.WSClient(frame.gamefield, "ws://192.168.1.4:8000")
     time.sleep(1)
     chara = entity.Player(frame.gamefield)
     frame.gamefield.players.add(chara)
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     chara.standalone = True
     chara.transmit = True
-    chara.effects.append(effects.Poison(chara))
+#    chara.effects.append(effects.Poison(chara))
     frame.on_keypress = chara.on_keypress
     frame.on_keyrelease = chara.on_keyrelease
     frame.on_click = chara.on_click

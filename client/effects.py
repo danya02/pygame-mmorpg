@@ -9,6 +9,7 @@ import math
 class Effect(threading.Thread):
     def __init__(self, target=None):
         super().__init__()
+        self.name = "Status effect"
         self.target = target
         self.do_effect = True
         self.running = False
@@ -17,6 +18,7 @@ class Effect(threading.Thread):
     def run(self):
         self.running = True
         while self.running:
+            break
             if self.target is not None:
                 time.sleep(self.delay)
                 self.target.image = self.target.original_image.copy()
@@ -25,10 +27,12 @@ class Effect(threading.Thread):
 class Poison(Effect):
     def __init__(self, target=None):
         super().__init__(target)
+        self.name = "Poison status effect"
 
     def run(self):
         self.running = True
         while self.running:
+            break
             if self.target is not None:
                 time.sleep(self.delay)
                 self.target.image = self.target.original_image.copy()
@@ -43,10 +47,13 @@ class Poison(Effect):
 class Fire(Effect):
     def __init__(self, target=None):
         super().__init__(target)
+        self.name = "Fire status effect"
+
 
     def run(self):
         self.running = True
         while self.running:
+            break
             if self.target is not None:
                 time.sleep(self.delay)
                 self.target.image = self.target.original_image.copy()
