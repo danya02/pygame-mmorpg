@@ -35,8 +35,7 @@ class Entity(pygame.sprite.Sprite):
 
     def update_target(self):
         if self.target is not None:
-            self.pan = (self.original_center[0] - self.target.original_center[0],
-                        self.original_center[1] - self.target.original_center[1])
+            self.pan = (400-self.target.original_center[0],300-self.target.original_center[1])
         self.update_image()
 
     def update(self, data=None, full: bool = False, field=None):
@@ -150,6 +149,7 @@ class Player(Entity):
         self.sprites = [[zoom(pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))), 2) for i in
                          range(2 if j in 'lr' else 4)] for j in 'urdl']
         self.transmit = False
+        self.is_target = None
 
     def load(self, data: dict) -> None:
         """
@@ -181,15 +181,15 @@ class Player(Entity):
         if self.standalone:
             self.rect.center = (400, 300)
         self.update_image(False)
-        if self.transmit:
+        if self.transmit and self.standalone:
             if pygame.K_UP in self.pressed_keys:
-                connection.client.action(action_type='up')
+                connection.client.action('up')
             if pygame.K_DOWN in self.pressed_keys:
-                connection.client.action(action_type='down')
+                connection.client.action('down')
             if pygame.K_LEFT in self.pressed_keys:
-                connection.client.action(action_type='left')
+                connection.client.action('left')
             if pygame.K_RIGHT in self.pressed_keys:
-                connection.client.action(action_type='right')
+                connection.client.action('right')
 
     def on_keypress(self, key) -> None:
         """

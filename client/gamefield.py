@@ -26,25 +26,6 @@ class GameField:
                 for j in range(600):
                     self.surface.set_at((i, j), pygame.Color(random.randint(0, 255), random.randint(0, 255),
                                                              random.randint(0, 255), 255))
-        if len(data['players']) != 0:
-            for i in data['players']:
-                p = entity.Player(self)  # TODO: create from data
-                p.id = i['id']
-                p.rect.centerx = i['x']
-                p.rect.centery = i['y']
-                self.players.add(p)
-            if len(data['entities']) != 0:
-                p = entity.Entity(self)  # TODO: create from data
-                p.id = i['id']
-                p.rect.centerx = i['x']
-                p.rect.centery = i['y']
-                self.entities.add(p)
-            if len(data['npcs']) != 0:
-                p = entity.NPC(self)  # TODO: create from data
-                p.id = i['id']
-                p.rect.centerx = i['x']
-                p.rect.centery = i['y']
-                self.npcs.add(p)
 
     def update(self, data):
         self.players.update(data['players'], data.get('full', False), self)

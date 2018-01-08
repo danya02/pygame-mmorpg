@@ -11,7 +11,7 @@ frame = window.Window()
 frame.gamefield = gamefield.GameField()
 #frame.gamefield.load({'bg': 1, 'players': []})
 if __name__ == '__main__':
-    connection.client = client.WSClient(frame.gamefield, "ws://10.42.0.233:8000")
+    connection.client = client.WSClient(frame.gamefield, "ws://localhost:8000")
     time.sleep(1)
     chara = entity.Player(frame.gamefield)
     frame.gamefield.players.add(chara)
