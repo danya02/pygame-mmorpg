@@ -31,6 +31,13 @@ class Entity(pygame.sprite.Sprite):
         self.walk_tick_delay = 1
         self.walk_tick_phase = 0
         self.standalone = False
+        self.target = None
+
+    def update_target(self):
+        if self.target is not None:
+            self.pan = (self.original_center[0] - self.target.original_center[0],
+                        self.original_center[1] - self.target.original_center[1])
+        self.update_image()
 
     def update(self, data=None, full: bool = False, field=None):
         """
@@ -43,11 +50,14 @@ class Entity(pygame.sprite.Sprite):
             self.field = field
         if data is None:
             self.update_image()
-        elif 'target' in data and data['target'] is not self and data['target'] is not None:
-            self.pan = (self.original_center[0] - data['target'].original_center[0],
-                        self.original_center[1] - data['target'].original_center[1])
-            self.update_image()
+        elif 'target' in data and data['target'] is not self and data['target'] is not None and not self.standalone:
+            self.target = data['target']
+            self.update_target()
+            return None
         else:
+            if 'target' in data:
+                self.update_target()
+                return None
             for i in data:
                 if i['id'] == self.id:
                     mydata = data.pop(data.index(i))
@@ -111,7 +121,7 @@ class NPC(Entity):
         This class describes an NPC. An NPC is an Entity that is a character not controlled by humans.
         """
         super().__init__(field)
-        self.walk_tick_delay = 150
+        self.walk_tick_delay = 15
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
         self.sprites = [[zoom(pygame.image.load('sprites/spr_chara{}_{}.png'.format(j, str(i))), 2) for i in
@@ -134,7 +144,7 @@ class Player(Entity):
         """
         super().__init__(field)
         self.hp = 100
-        self.walk_tick_delay = 150
+        self.walk_tick_delay = 15
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
         self.sprites = [[zoom(pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))), 2) for i in
@@ -167,19 +177,9 @@ class Player(Entity):
         """
         if field is not None:
             self.field = field
-        if not self.standalone:
-            super().update(data, full)
-        else:
-            if pygame.K_UP in self.pressed_keys:
-                self.original_center = (self.original_center[0], self.original_center[1] - 1)
-            if pygame.K_DOWN in self.pressed_keys:
-                self.original_center = (self.original_center[0], self.original_center[1] + 1)
-            if pygame.K_LEFT in self.pressed_keys:
-                self.original_center = (self.original_center[0] - 1, self.original_center[1])
-            if pygame.K_RIGHT in self.pressed_keys:
-                self.original_center = (self.original_center[0] + 1, self.original_center[1])
-            self.rect.center = (400, 300)
-            self.update_image(False)
+        super().update(data, full)
+        self.rect.center = (400, 300)
+        self.update_image(False)
         if self.transmit:
             if pygame.K_UP in self.pressed_keys:
                 connection.client.action(action_type='up')

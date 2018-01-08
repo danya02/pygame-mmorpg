@@ -23,8 +23,6 @@ if __name__ == '__main__':
 #    auth()
 
 if __name__ == '__main__':
-
-    chara.id = 1
     chara.standalone = True
     chara.transmit = True
     chara.effects.append(effects.Poison(chara))

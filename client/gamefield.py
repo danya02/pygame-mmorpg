@@ -47,7 +47,6 @@ class GameField:
                 self.npcs.add(p)
 
     def update(self, data):
-
         self.players.update(data['players'], data.get('full', False), self)
         self.entities.update(data['entities'], data.get('full', False), self)
         self.npcs.update(data['npcs'], data.get('full', False), self)
@@ -55,22 +54,22 @@ class GameField:
             for i in data['players']:
                 p = entity.Player(self)  # TODO: create from data
                 p.id = i['id']
-                p.rect.centerx = i['x']
-                p.rect.centery = i['y']
+                p.original_center = (i['x'], i['y'])
+                p.update(data['players'], data.get('full', False), self)
                 self.players.add(p)
         if len(data['entities']) != 0:
             for i in data['entities']:
                 p = entity.Entity(self)  # TODO: create from data
                 p.id = i['id']
-                p.rect.centerx = i['x']
-                p.rect.centery = i['y']
+                p.original_center = (i['x'], i['y'])
+                p.update(data['players'], data.get('full', False), self)
                 self.entities.add(p)
         if len(data['npcs']) != 0:
             for i in data['npcs']:
                 p = entity.NPC(self)  # TODO: create from data
                 p.id = i['id']
-                p.rect.centerx = i['x']
-                p.rect.centery = i['y']
+                p.original_center = (i['x'], i['y'])
+                p.update(data['npcs'], data.get('full', False), self)
                 self.npcs.add(p)
 
     def draw(self, surface):
@@ -84,6 +83,7 @@ class GameField:
         self.npcs.draw(surface)
         self.entities.update({'target': self.target})
         self.entities.draw(surface)
+        self.inventory.update()
         self.inventory.draw(surface)
 
     def send_from_player(self, data):
