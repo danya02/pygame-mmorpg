@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+import traceback
+
 import pygame
 import math
 
@@ -8,11 +10,12 @@ import effects
 
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, field):
         """
         This class describes an Entity. An Entity is an object that has sprites, and can be moved by the server.
         """
         super().__init__()
+        self.field = field
         self.id = None
         self.image = pygame.Surface((1, 1))
         self.original_image = pygame.Surface((1, 1))
@@ -28,21 +31,33 @@ class Entity(pygame.sprite.Sprite):
         self.walk_tick_delay = 1
         self.walk_tick_phase = 0
         self.standalone = False
+        self.target = None
 
-    def update(self, data=None, full: bool = False):
+    def update_target(self):
+        if self.target is not None:
+            self.pan = (self.original_center[0] - self.target.original_center[0],
+                        self.original_center[1] - self.target.original_center[1])
+        self.update_image()
+
+    def update(self, data=None, full: bool = False, field=None):
         """
         Update this with given data. If no data, update the sprite instead.
         :param data: data to find me in and to update from.
         :param full: is the update a full one?
         :return: my part of data, or None if there is no such.
         """
+        if field is not None:
+            self.field = field
         if data is None:
             self.update_image()
-        elif 'target' in data and data['target'] is not self and data['target'] is not None:
-            self.pan = (self.original_center[0] - data['target'].original_center[0],
-                        self.original_center[1] - data['target'].original_center[1])
-            self.update_image()
+        elif 'target' in data and data['target'] is not self and data['target'] is not None and not self.standalone:
+            self.target = data['target']
+            self.update_target()
+            return None
         else:
+            if 'target' in data:
+                self.update_target()
+                return None
             for i in data:
                 if i['id'] == self.id:
                     mydata = data.pop(data.index(i))
@@ -101,12 +116,12 @@ class Entity(pygame.sprite.Sprite):
 
 
 class NPC(Entity):
-    def __init__(self):
+    def __init__(self, field):
         """
         This class describes an NPC. An NPC is an Entity that is a character not controlled by humans.
         """
-        super().__init__()
-        self.walk_tick_delay = 150
+        super().__init__(field)
+        self.walk_tick_delay = 15
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
         self.sprites = [[zoom(pygame.image.load('sprites/spr_chara{}_{}.png'.format(j, str(i))), 2) for i in
@@ -122,14 +137,14 @@ class Projectile(Entity):
 
 
 class Player(Entity):
-    def __init__(self):
+    def __init__(self, field):
         """
         This class describes a Player. A Player is a character that a human controls.
         That includes the player at this computer.
         """
-        super().__init__()
+        super().__init__(field)
         self.hp = 100
-        self.walk_tick_delay = 150
+        self.walk_tick_delay = 15
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
         self.sprites = [[zoom(pygame.image.load('sprites/spr_f_mainchara{}_{}.png'.format(j, str(i))), 2) for i in
@@ -141,34 +156,31 @@ class Player(Entity):
         Initialize self with data from login process.
         :param data: the dict that was parsed from json.
         """
-        self.original_center = data['player_info']['x'], data['player_info']['y']
-        self.id = data['user_id']
-        self.hp = data['player_info']['hp']
-        self.direction = data['player_info']['direction']
-        self.effects = [effects.get_effect(i) for i in data['player_info']['effects']]
-        self.groups()[0].field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
+        try:
+            self.original_center = data['player_info']['x'], data['player_info']['y']
+            self.id = data['user_id']
+            self.hp = data['player_info']['hp']
+            self.direction = data['player_info']['direction']
+            self.effects = [effects.get_effect(i) for i in data['player_info']['effects']]
+            self.field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
+        except:
+            traceback.print_exc()
 
-    def update(self, data=None, full=False):
+    def update(self, data=None, full=False, field=None):
         """
         Update this with given data. If no data, update the sprite instead.
         If I am a standalone Player, ignore data and move myself instead.
         :param data: data to find me in and to update from.
         :param full: is the update a full one?
+        :param field: the GameField that this is a part of.
         :return: my part of data, or None if there is no such.
         """
-        if not self.standalone:
-            super().update(data, full)
-        else:
-            if pygame.K_UP in self.pressed_keys:
-                self.original_center = (self.original_center[0], self.original_center[1] - 1)
-            if pygame.K_DOWN in self.pressed_keys:
-                self.original_center = (self.original_center[0], self.original_center[1] + 1)
-            if pygame.K_LEFT in self.pressed_keys:
-                self.original_center = (self.original_center[0] - 1, self.original_center[1])
-            if pygame.K_RIGHT in self.pressed_keys:
-                self.original_center = (self.original_center[0] + 1, self.original_center[1])
+        if field is not None:
+            self.field = field
+        super().update(data, full)
+        if self.standalone:
             self.rect.center = (400, 300)
-            self.update_image(False)
+        self.update_image(False)
         if self.transmit:
             if pygame.K_UP in self.pressed_keys:
                 connection.client.action(action_type='up')

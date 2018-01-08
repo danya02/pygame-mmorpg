@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from tkinter import *
 import tkinter.messagebox as tm
-import main
+import connection
 
 
 class LoginFrame(Frame):
@@ -37,7 +37,7 @@ class LoginFrame(Frame):
         """
         username = self.entry_1.get()
         password = self.entry_2.get()
-        client = main.client
+        client = connection.client
         client.auth(username, password, self._login_callback)
 
     def _login_callback(self, result: dict) -> None:
@@ -45,8 +45,9 @@ class LoginFrame(Frame):
         For when the async login has completed.
         :param result: The returned dict of data.
         """
-        if result['type'] == 'auth_ok':
-            self.callback(result['data'])
+        if result != 'Wrong login or password':
+            self.callback(result)
+            raise SystemExit
         else:
             tm.showerror("Wrong credentials!", "The username and/or password given was incorrect. Please try again.")
 
