@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+import traceback
+
 import pygame
 import math
 
@@ -29,13 +31,15 @@ class Entity(pygame.sprite.Sprite):
         self.walk_tick_phase = 0
         self.standalone = False
 
-    def update(self, data=None, full: bool = False):
+    def update(self, data=None, full: bool = False, field=None):
         """
         Update this with given data. If no data, update the sprite instead.
         :param data: data to find me in and to update from.
         :param full: is the update a full one?
         :return: my part of data, or None if there is no such.
         """
+        if field is not None:
+            self.field = field
         if data is None:
             self.update_image()
         elif 'target' in data and data['target'] is not self and data['target'] is not None:
@@ -141,14 +145,17 @@ class Player(Entity):
         Initialize self with data from login process.
         :param data: the dict that was parsed from json.
         """
-        self.original_center = data['player_info']['x'], data['player_info']['y']
-        self.id = data['user_id']
-        self.hp = data['player_info']['hp']
-        self.direction = data['player_info']['direction']
-        self.effects = [effects.get_effect(i) for i in data['player_info']['effects']]
-        self.groups()[0].field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
+        try:
+            self.original_center = data['player_info']['x'], data['player_info']['y']
+            self.id = data['user_id']
+            self.hp = data['player_info']['hp']
+            self.direction = data['player_info']['direction']
+            self.effects = [effects.get_effect(i) for i in data['player_info']['effects']]
+            self.groups()[0].field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
+        except:
+            traceback.print_exc()
 
-    def update(self, data=None, full=False):
+    def update(self, data=None, full=False, field=None):
         """
         Update this with given data. If no data, update the sprite instead.
         If I am a standalone Player, ignore data and move myself instead.
@@ -156,6 +163,8 @@ class Player(Entity):
         :param full: is the update a full one?
         :return: my part of data, or None if there is no such.
         """
+        if field is not None:
+            self.field = field
         if not self.standalone:
             super().update(data, full)
         else:

@@ -48,9 +48,9 @@ class GameField:
 
     def update(self, data):
 
-        self.players.update(data['players'], data.get('full', False))
-        self.entities.update(data['entities'], data.get('full', False))
-        self.npcs.update(data['npcs'], data.get('full', False))
+        self.players.update(data['players'], data.get('full', False), self)
+        self.entities.update(data['entities'], data.get('full', False), self)
+        self.npcs.update(data['npcs'], data.get('full', False), self)
         if len(data['players']) != 0:
             for i in data['players']:
                 p = entity.Player()  # TODO: create from data

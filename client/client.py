@@ -59,11 +59,16 @@ class WSClient(threading.Thread):
     def action(self, action_type, data=''):
         self.send_message({'action': action_type, 'data': data})
 
-    def auth(self, user, password):
-        self.send_message({'type': 'auth', 'data': {'user': user, 'password': password}})
+    def auth(self, user, password, func):
+        rand = str(uuid.uuid4())
+        self.send_message({'type': 'auth', 'data': {'user': user, 'password': password}, 'id': rand})
+        self.call_backs[rand] = func
 
     def run(self):
         self.ws_connection.run_forever()
+
+    def reg(self):
+        self.send_message({'type': 'reg', 'data': {'user': 'admin', 'password': '1234'}})
 
     def session_auth(self, session):
         self.send_message({'type': 'session_auth', 'data': {'session': session}})
@@ -72,3 +77,4 @@ class WSClient(threading.Thread):
         rand = str(uuid.uuid4())
         self.send_message({'type': 'get_image', 'data': data, 'id': rand})
         self.call_backs[rand] = func
+

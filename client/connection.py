@@ -2,6 +2,7 @@
 import os
 import pygame
 import login
+import tkinter
 import client as module_client
 
 class TestClient:
@@ -20,7 +21,7 @@ class TestClient:
         callback({"name": name, "size": (1, 1), "src": str(pygame.image.tostring(pygame.Surface((1, 1)), "RGBA"))})
 
 
-def auth():
+def auth(callback):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
         raise PermissionError
@@ -28,7 +29,7 @@ def auth():
             client.session_auth(i.read())
     except (FileNotFoundError, PermissionError):
         root = tkinter.Tk()
-        lf = login.LoginFrame(root)
+        lf = login.LoginFrame(root, callback)
         try:
             root.mainloop()
         except SystemExit:

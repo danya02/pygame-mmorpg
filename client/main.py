@@ -13,13 +13,17 @@ frame.gamefield = gamefield.GameField()
 if __name__ == '__main__':
     connection.client = client.WSClient(frame.gamefield, "ws://10.42.0.233:8000")
     time.sleep(1)
-    connection.client.auth('admin', '1234')
+    chara = entity.Player()
+    frame.gamefield.players.add(chara)
+    frame.gamefield.target = chara
+    connection.auth(chara.load)
+    #connection.client.auth('admin', '1234')
 
 # if __name__ == '__main__':
 #    auth()
 
 if __name__ == '__main__':
-    chara = entity.Player()
+
     chara.id = 1
     chara.standalone = True
     chara.transmit = True
