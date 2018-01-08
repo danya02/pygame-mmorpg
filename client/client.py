@@ -70,8 +70,10 @@ class WSClient(threading.Thread):
     def reg(self, name, password):
         self.send_message({'type': 'reg', 'data': {'user': name, 'password': password}})
 
-    def session_auth(self, session):
-        self.send_message({'type': 'session_auth', 'data': {'session': session}})
+    def session_auth(self, session, func):
+        rand = str(uuid.uuid4())
+        self.send_message({'type': 'session_auth', 'data': {'session': session}, 'id': rand})
+        self.call_backs[rand] = func
 
     def get_image(self, data, func):
         rand = str(uuid.uuid4())

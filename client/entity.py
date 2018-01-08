@@ -10,11 +10,12 @@ import effects
 
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, field):
         """
         This class describes an Entity. An Entity is an object that has sprites, and can be moved by the server.
         """
         super().__init__()
+        self.field = field
         self.id = None
         self.image = pygame.Surface((1, 1))
         self.original_image = pygame.Surface((1, 1))
@@ -105,11 +106,11 @@ class Entity(pygame.sprite.Sprite):
 
 
 class NPC(Entity):
-    def __init__(self):
+    def __init__(self, field):
         """
         This class describes an NPC. An NPC is an Entity that is a character not controlled by humans.
         """
-        super().__init__()
+        super().__init__(field)
         self.walk_tick_delay = 150
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
@@ -126,12 +127,12 @@ class Projectile(Entity):
 
 
 class Player(Entity):
-    def __init__(self):
+    def __init__(self, field):
         """
         This class describes a Player. A Player is a character that a human controls.
         That includes the player at this computer.
         """
-        super().__init__()
+        super().__init__(field)
         self.hp = 100
         self.walk_tick_delay = 150
         zoom = lambda img, factor: pygame.transform.scale(img, (
@@ -151,7 +152,7 @@ class Player(Entity):
             self.hp = data['player_info']['hp']
             self.direction = data['player_info']['direction']
             self.effects = [effects.get_effect(i) for i in data['player_info']['effects']]
-            self.groups()[0].field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
+            self.field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
         except:
             traceback.print_exc()
 
@@ -161,6 +162,7 @@ class Player(Entity):
         If I am a standalone Player, ignore data and move myself instead.
         :param data: data to find me in and to update from.
         :param full: is the update a full one?
+        :param field: the GameField that this is a part of.
         :return: my part of data, or None if there is no such.
         """
         if field is not None:
