@@ -67,8 +67,8 @@ class WSClient(threading.Thread):
     def run(self):
         self.ws_connection.run_forever()
 
-    def reg(self):
-        self.send_message({'type': 'reg', 'data': {'user': 'admin', 'password': '1234'}})
+    def reg(self, name, password):
+        self.send_message({'type': 'reg', 'data': {'user': name, 'password': password}})
 
     def session_auth(self, session):
         self.send_message({'type': 'session_auth', 'data': {'session': session}})
