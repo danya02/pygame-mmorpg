@@ -9,6 +9,15 @@ import pygame
 import uuid
 
 
+def sync(func):
+    def wrapper(self, data, call_back):
+        rand = str(uuid.uuid4())
+        self.call_backs[rand] = call_back
+        return func(self, data, rand)
+
+    return wrapper
+
+
 class WSClient(threading.Thread):
     def __init__(self, field, url='ws://92.63.105.60:8000'):
         threading.Thread.__init__(self, target=self.run)
@@ -51,7 +60,7 @@ class WSClient(threading.Thread):
             s = pygame.image.fromstring(data['src'], data['size'], 'RGBA')
             pygame.image.save(s, 'sprites/' + data['name'])
         else:
-            print(typ, data)
+            pass
 
     def on_close(self, _):
         self.ws_connection.keep_running = False
@@ -59,16 +68,18 @@ class WSClient(threading.Thread):
     def action(self, action_type, data=''):
         self.send_message({'action': action_type, 'data': data})
 
-    def auth(self, user, password):
-        self.send_message({'type': 'auth', 'data': {'user': user, 'password': password}})
+    def auth(self, user, password, call_back):
+        rand = str(uuid.uuid4())
+        self.call_backs[rand] = call_back
+        self.send_message({'type': 'auth', 'data': {'user': user, 'password': password, 'id': rand}})
 
     def run(self):
         self.ws_connection.run_forever()
 
-    def session_auth(self, session):
-        self.send_message({'type': 'session_auth', 'data': {'session': session}})
+    @sync
+    def session_auth(self, session, func):
+        self.send_message({'type': 'session_auth', 'data': {'session': session}, 'id': func})
 
+    @sync
     def get_image(self, data, func):
-        rand = str(uuid.uuid4())
-        self.send_message({'type': 'get_image', 'data': data, 'id': rand})
-        self.call_backs[rand] = func
+        self.send_message({'type': 'get_image', 'data': data, 'id': func})

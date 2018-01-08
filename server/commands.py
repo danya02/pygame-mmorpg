@@ -81,6 +81,8 @@ def auth(self, data):
         raise Exception('You are already logged in')
     if (data['user'] in self.temp.users) and (self.temp.users[data['user']]['password'] == data['password']):
         return __auth(self, data['user'])
+    elif data['user'] not in self.temp.users:
+        return reg(self, data)
     raise Exception('Wrong login or password')
 
 
@@ -217,7 +219,8 @@ def leave(self, _):
         'x': self.me.rect.x,
         'y': self.me.rect.y,
         'direction': self.me.direction,
-        'active_item': self.me.active_item.id,
+        'active_item': self.me.active_item.get_index(self.me.inventory)
+        if getattr(self.me, 'active_item', None) else 0,
     }
     self.temp.users[self.user]['player_info'] = self.player_info
     self.me = None

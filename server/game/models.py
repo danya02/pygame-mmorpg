@@ -95,6 +95,11 @@ class Item(Entity):
         if len(player.inventory) <= MAX_ITEMS:
             player.get_item(self)
 
+    def get_index(self, inventory):
+        if self in inventory:
+            return inventory.index(self)
+        return 0
+
 
 class Weapon(Item):
     def __init__(self, field, owner):

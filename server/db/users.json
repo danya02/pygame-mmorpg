@@ -10,10 +10,25 @@
       ],
       "effects": [],
       "hp": 100,
-      "x": 252,
-      "y": 126,
-      "direction": 1,
-      "active_item": "51"
+      "x": 146,
+      "y": 112,
+      "direction": 0,
+      "active_item": 0
+    }
+  },
+  "test": {
+    "user": "test",
+    "password": "1234",
+    "user_rights": 1,
+    "user_id": 2,
+    "player_info": {
+      "inventory": [],
+      "effects": [],
+      "hp": 100,
+      "x": 100,
+      "y": 100,
+      "direction": 0,
+      "active_item": 0
     }
   }
 }

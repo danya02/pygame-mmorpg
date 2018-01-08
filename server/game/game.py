@@ -13,7 +13,7 @@ import random
 
 
 class Player(game.models.NPC):
-    def __init__(self, x, y, hp, inventory, active_item, direction, field, user):
+    def __init__(self, x, y, hp, inventory, active_item, field, user):
         super(Player, self).__init__(Rect(x, y, PLAYER_WIDTH, PLAYER_HEIGHT), field, hp)
         self.name = user.user
         self.id = user.user_id
@@ -22,7 +22,6 @@ class Player(game.models.NPC):
         self.active_item = active_item
 
         self.speed_x = self.speed_y = 0
-        self.direction = direction
 
     def kill(self):
         self.field.channel.send_pm({'type': 'dead', 'data': 'You dead.'}, self.name)
@@ -36,16 +35,12 @@ class Player(game.models.NPC):
     def action(self, act, data):
         if act == 'left':
             self.speed_x = -PLAYER_SPEED
-            self.direction = 3
         elif act == 'right':
             self.speed_x = PLAYER_SPEED
-            self.direction = 1
         elif act == 'up':
             self.speed_y = -PLAYER_SPEED
-            self.direction = 0
         elif act == 'down':
             self.speed_y = PLAYER_SPEED
-            self.direction = 2
         elif act == 'hit':
             if self.active_item:
                 self.active_item.hit()
@@ -132,8 +127,8 @@ class Field:
             entity.update()
         self.tick += 1
 
-    def add_player(self, x, y, hp, inventory, direction, active_item, user):
-        player = Player(x, y, hp, inventory, direction, active_item, self, user)
+    def add_player(self, x, y, hp, inventory, active_item, user):
+        player = Player(x, y, hp, inventory, active_item, self, user)
         for i in range(len(player.inventory)):
             player.inventory[i] = player.inventory[i](self, player)
         if active_item:
@@ -164,8 +159,8 @@ class Field:
             return False
 
     def get_object_by_id(self, item_id):
-        if not item_id:
-            return
+        if item_id is []:
+            return []
         if type(item_id) == list:
             return [self.get_object_by_id(i) for i in item_id]
         all_objects = list(filter(lambda x: self.get_attr(x),
@@ -182,13 +177,13 @@ class Game(threading.Thread):
 
     def add_player(self, user):
         inventory = self.field.get_object_by_id(user.player_info['inventory'])
-        if user.player_info['active_item']:
-            active_item = self.field.get_object_by_id(user.player_info['active_item'])
-        else:
+        try:
+            active_item = inventory[user.player_info['active_item']]
+        except IndexError:
             active_item = None
         return self.field.add_player(user.player_info['x'], user.player_info['y'],
                                      user.player_info['hp'], inventory,
-                                     active_item, user.player_info['direction'], user)
+                                     active_item, user)
 
     def delete_player(self, user):
         self.field.players.remove(user.me)
@@ -214,7 +209,8 @@ class Game(threading.Thread):
                         'y': player.rect.y,
                         'hp': player.hp,
                         'id': player.user.user_id,
-                        'active_item': player.active_item.id,
+                        'active_item': player.active_item.get_index(player.inventory)
+                        if getattr(player, 'active_item', None) else 0,
                         'inventory': list(map(lambda x: x.id, player.inventory)),
                         'effects': [
                             {
