@@ -7,6 +7,7 @@ import threading
 import json
 import pygame
 import uuid
+import traceback
 
 
 def sync(func):
@@ -19,7 +20,7 @@ def sync(func):
 
 
 class WSClient(threading.Thread):
-    def __init__(self, field, url='ws://92.63.105.60:8000'):
+    def __init__(self, field, url='ws://92.63.105.60:8000', debug=True):
         threading.Thread.__init__(self, target=self.run)
         self.field = field
         self.url = url
@@ -30,6 +31,8 @@ class WSClient(threading.Thread):
             on_close=self.on_close
         )
         self.ws_connection.keep_running = True
+        if debug:
+            self.ws_connection._callback = self.debug_callback
         self.start()
         self.call_backs = {}
 
@@ -83,3 +86,10 @@ class WSClient(threading.Thread):
     @sync
     def get_image(self, data, func):
         self.send_message({'type': 'get_image', 'data': data, 'id': func})
+
+    def debug_callback(self, callback, *args):
+        if callback:
+            try:
+                callback(self, *args)
+            except:
+                traceback.print_exc()
