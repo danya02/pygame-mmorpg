@@ -51,7 +51,8 @@ class WSClient(threading.Thread):
             s = pygame.image.fromstring(data['src'], data['size'], 'RGBA')
             pygame.image.save(s, 'sprites/' + data['name'])
         else:
-            print(typ, data)
+            pass
+            #print(typ, data)
 
     def on_close(self, _):
         self.ws_connection.keep_running = False

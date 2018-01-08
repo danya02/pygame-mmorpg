@@ -178,7 +178,8 @@ class Player(Entity):
         if field is not None:
             self.field = field
         super().update(data, full)
-        self.rect.center = (400, 300)
+        if self.standalone:
+            self.rect.center = (400, 300)
         self.update_image(False)
         if self.transmit:
             if pygame.K_UP in self.pressed_keys:

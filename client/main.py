@@ -33,8 +33,11 @@ if __name__ == '__main__':
     frame.gamefield.players.add(chara)
     frame.gamefield.target = chara
     frame.start()
-    while 1:
-        pass
+    try:
+        while 1:
+            pass
+    except KeyboardInterrupt:
+        exit(0)
     while 1:
         n = -100
         for i in range(30):

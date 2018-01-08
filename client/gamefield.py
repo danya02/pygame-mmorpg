@@ -54,8 +54,10 @@ class GameField:
             for i in data['players']:
                 p = entity.Player(self)  # TODO: create from data
                 p.id = i['id']
+                p.standalone = False
                 p.original_center = (i['x'], i['y'])
                 p.update(data['players'], data.get('full', False), self)
+                p.update({'target':self.target})
                 self.players.add(p)
         if len(data['entities']) != 0:
             for i in data['entities']:
@@ -63,6 +65,7 @@ class GameField:
                 p.id = i['id']
                 p.original_center = (i['x'], i['y'])
                 p.update(data['players'], data.get('full', False), self)
+                p.update({'target':self.target})
                 self.entities.add(p)
         if len(data['npcs']) != 0:
             for i in data['npcs']:
@@ -70,6 +73,7 @@ class GameField:
                 p.id = i['id']
                 p.original_center = (i['x'], i['y'])
                 p.update(data['npcs'], data.get('full', False), self)
+                p.update({'target':self.target})
                 self.npcs.add(p)
 
     def draw(self, surface):
