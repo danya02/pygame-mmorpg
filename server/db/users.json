@@ -1,48 +1,48 @@
 {
   "test1": {
+    "user": "test1",
     "password": "1234",
     "player_info": {
-      "inventory": [],
-      "x": 100,
-      "active_item": 0,
-      "direction": 0,
-      "y": 100,
       "hp": 100,
-      "effects": []
+      "y": 100,
+      "active_item": 0,
+      "effects": [],
+      "x": 100,
+      "direction": 0,
+      "inventory": []
     },
-    "user": "test1",
-    "user_rights": 1,
-    "user_id": 3
+    "user_id": 3,
+    "user_rights": 1
   },
   "admin": {
+    "user": "admin",
     "password": "1234",
     "player_info": {
       "hp": 100,
-      "x": 734,
+      "y": 90,
+      "active_item": 0,
       "effects": [],
+      "x": 58,
+      "direction": 0,
       "inventory": [
         "51"
-      ],
-      "direction": 0,
-      "y": 42,
-      "active_item": 0
+      ]
     },
-    "user": "admin",
-    "user_rights": 1,
-    "user_id": 1
+    "user_id": 1,
+    "user_rights": 1
   },
   "test": {
     "password": "1234",
     "player_info": {
       "hp": 100,
-      "x": 0,
+      "y": 0,
+      "active_item": 0,
       "effects": [],
-      "inventory": [],
+      "x": 0,
       "direction": 0,
-      "y": 2,
-      "active_item": 0
+      "inventory": []
     },
-    "user_rights": 1,
-    "user_id": 2
+    "user_id": 2,
+    "user_rights": 1
   }
 }

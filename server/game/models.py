@@ -108,7 +108,7 @@ class Weapon(Item):
 
         super(Weapon, self).__init__(Rect(0, 0, self.width, self.height), field, owner)
         self.damage_value = 0
-        self.damage_radius = 40
+        self.damage_radius = 70
 
         self.damage_delay = 15
         self.last_damage_tick = 0
@@ -118,7 +118,7 @@ class Weapon(Item):
             return
         self.last_damage_tick = self.field.tick
         npcs = self.field.npc + self.field.players
-        npcs.remove(self)
+        npcs.remove(self.owner)
         for npc in npcs:
             if (abs(npc.rect.center[0] - self.rect.center[0]) < self.damage_radius) \
                     and (abs(npc.rect.center[1] - self.rect.center[1]) < self.damage_radius):

@@ -36,7 +36,7 @@ class Entity(pygame.sprite.Sprite):
 
     def update_target(self):
         if self.target is not None:
-            self.pan = (400-self.target.original_center[0],300-self.target.original_center[1])
+            self.pan = (400 - self.target.original_center[0], 300 - self.target.original_center[1])
         self.update_image()
 
     def update(self, data=None, full: bool = False, field=None):
@@ -97,8 +97,11 @@ class Entity(pygame.sprite.Sprite):
             if self.walk_phase >= len(self.sprites[self.direction]):
                 self.walk_phase = 0
         target = self.rect.center
-        self.original_image = self.sprites[self.direction][self.walk_phase]
-        self.rect = self.image.get_rect()
+        if self.can_walk:
+            self.original_image = self.sprites[self.direction][self.walk_phase]
+        else:
+            self.original_image = self.sprites[0]
+        self.rect = self.original_image.get_rect()
         self.rect.center = target
 
     def update_walking(self) -> bool:
@@ -106,18 +109,32 @@ class Entity(pygame.sprite.Sprite):
         Am I walking?
         :return: if I am walking.
         """
-        if not self.can_walk:
-            self.walking = False
-            return False
-        walk = False
-        for i, j in enumerate([pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT]):
-            if j in self.pressed_keys:
-                self.direction = i
-                walk = True
-        self.walking = walk
-        if not self.walking:
-            self.walk_phase = 0
-        return self.walking
+        if self.can_walk:
+            walk = False
+            for i, j in enumerate([pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT]):
+                if j in self.pressed_keys:
+                    self.direction = i
+                    walk = True
+            self.walking = walk
+            if not self.walking:
+                self.walk_phase = 0
+            return self.walking
+
+    def get_image(self):
+        try:
+            self.image = pygame.image.load('sprites/{}.png'.format(self.id))
+        except pygame.error:
+            connection.client.get_image(self.id+'.png', self.set_image)
+            pass
+
+    def set_image(self, data):
+        self.image = pygame.image.fromstring(eval(data['src']), tuple(data['size']), "RGBA")
+        center = self.rect.center
+        try:
+            self.rect = self.original_image.get_rect()
+        except AttributeError:
+            self.rect = self.original_image[0].get_rect()
+        self.rect.center = center
 
     def get_image(self):
         try:
@@ -219,7 +236,7 @@ class Player(Entity):
         if key in [eval('pygame.K_{}'.format(str(i))) for i in range(10)]:
             dict = eval('{' + ', '.join(['pygame.K_{}: {}'.format(str(i), str(i - 1)) for i in range(10)]) + '}')
             dict.update({pygame.K_0: 9})
-            self.groups()[0].field.inventory.selected = dict[key]
+            self.field.inventory.selected = dict[key]
             if self.transmit:
                 connection.client.action('active_item_change', dict[key])
         self.update_walking()
@@ -244,7 +261,11 @@ class Player(Entity):
             angle = math.acos(cosa) * 180 / math.pi
             if self.transmit:
                 connection.client.action('action', angle)
+<<<<<<< HEAD
         elif button==1:
+=======
+        elif button == 1:
+>>>>>>> 4391304502c1d672696e03ff136d683556e65a8b
             connection.client.action('hit')
 
     def on_unclick(self, pos, button):

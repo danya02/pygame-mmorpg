@@ -20,8 +20,9 @@ def sync(func):
 
 
 class WSClient(threading.Thread):
-    def __init__(self, field, url='ws://92.63.105.60:8000'):
+    def __init__(self, field, url='ws://92.63.105.60:8000', debug=True):
         threading.Thread.__init__(self, target=self.run)
+        self.name = "Websocket client"
         self.field = field
         self.url = url
         self.ws_connection = websocket.WebSocketApp(
@@ -31,6 +32,8 @@ class WSClient(threading.Thread):
             on_close=self.on_close
         )
         self.ws_connection.keep_running = True
+        if debug:
+            self.ws_connection._callback = self.debug_callback
         self.start()
         self.ws_connection._callback = self.debug_callback
         self.call_backs = {}
