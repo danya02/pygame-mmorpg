@@ -21,11 +21,9 @@ class GameField:
 
     def load(self, data):
         if data['bg']:
-            self.surface = pygame.Surface((800, 600))  # TODO: generate from data
-            for i in range(800):
-                for j in range(600):
-                    self.surface.set_at((i, j), pygame.Color(random.randint(0, 255), random.randint(0, 255),
-                                                             random.randint(0, 255), 255))
+            zoom = lambda img, factor: pygame.transform.scale(img, (
+                int(img.get_width() * factor), int(img.get_height() * factor)))
+            self.surface = zoom(pygame.image.load('sprites/end_sky.png'), 20)
 
     def update(self, data):
         self.players.update(data['players'], data.get('full', False), self)

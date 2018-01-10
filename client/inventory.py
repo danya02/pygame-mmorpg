@@ -29,26 +29,27 @@ class Inventory:
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, item_id):
+    def __init__(self, item_id, inventory):
         super().__init__()
         self.id = item_id
         self.image = pygame.image.load('sprites/null_item.png')
         self.rect = self.image.get_rect()
-        self.inventory = None
+        self.inventory = inventory
+        self.get_image()
 
     def get_image(self):
         if self.inventory is not None:
             try:
                 self.image = pygame.image.load('sprites/{}.png'.format(self.id))
             except pygame.error:
-                connection.client.get_image(self.id+'.png')
+                connection.client.get_image(self.id+'.png', self.set_image)
                 pass
 
     def set_image(self, data):
-        self.image = pygame.image.fromstring(eval(data['src']), tuple(data['size']))
+        self.image = pygame.image.fromstring(eval(data['src']), tuple(data['size']), "RGBA")
         self.rect = self.image.get_rect()
         self.inventory.update()
 
 
-def get_item(item_id: str) -> Item:
-    return Item(item_id)
+def get_item(item_id: str, inventory: Inventory) -> Item:
+    return Item(item_id, inventory)

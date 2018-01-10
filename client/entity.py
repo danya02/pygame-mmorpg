@@ -28,6 +28,7 @@ class Entity(pygame.sprite.Sprite):
         self.pressed_keys = []
         self.effects = [effects.Effect(self)]
         self.walking = False
+        self.can_walk = False
         self.walk_tick_delay = 1
         self.walk_tick_phase = 0
         self.standalone = False
@@ -74,7 +75,8 @@ class Entity(pygame.sprite.Sprite):
                 self.direction = 2
             if deltay < 0:
                 self.direction = 0
-            self.walking = abs(deltax) + abs(deltay) > 0
+            if self.can_walk:
+                self.walking = abs(deltax) + abs(deltay) > 0
             self.original_center = mydata['x'], mydata['y']
             return mydata
 
@@ -86,13 +88,14 @@ class Entity(pygame.sprite.Sprite):
         if target:
             self.rect.centerx = self.original_center[0] + self.pan[0]
             self.rect.centery = self.original_center[1] + self.pan[1]
-        if self.walking:
-            self.walk_tick_phase += 1
-        if self.walk_tick_phase >= self.walk_tick_delay:
-            self.walk_tick_phase = 0
-            self.walk_phase += 1
-        if self.walk_phase >= len(self.sprites[self.direction]):
-            self.walk_phase = 0
+        if self.can_walk:
+            if self.walking:
+                self.walk_tick_phase += 1
+            if self.walk_tick_phase >= self.walk_tick_delay:
+                self.walk_tick_phase = 0
+                self.walk_phase += 1
+            if self.walk_phase >= len(self.sprites[self.direction]):
+                self.walk_phase = 0
         target = self.rect.center
         self.original_image = self.sprites[self.direction][self.walk_phase]
         self.rect = self.image.get_rect()
@@ -103,6 +106,9 @@ class Entity(pygame.sprite.Sprite):
         Am I walking?
         :return: if I am walking.
         """
+        if not self.can_walk:
+            self.walking = False
+            return False
         walk = False
         for i, j in enumerate([pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT]):
             if j in self.pressed_keys:
@@ -113,6 +119,17 @@ class Entity(pygame.sprite.Sprite):
             self.walk_phase = 0
         return self.walking
 
+    def get_image(self):
+        try:
+            self.image = pygame.image.load('sprites/{}.png'.format(self.id))
+        except pygame.error:
+            connection.client.get_image(self.id+'.png', self.set_image)
+            pass
+
+    def set_image(self, data):
+        self.image = pygame.image.fromstring(eval(data['src']), tuple(data['size']))
+        self.rect = self.image.get_rect()
+
 
 class NPC(Entity):
     def __init__(self, field):
@@ -120,6 +137,7 @@ class NPC(Entity):
         This class describes an NPC. An NPC is an Entity that is a character not controlled by humans.
         """
         super().__init__(field)
+        self.can_walk = True
         self.walk_tick_delay = 15
         zoom = lambda img, factor: pygame.transform.scale(img, (
             int(img.get_width() * factor), int(img.get_height() * factor)))
@@ -142,6 +160,7 @@ class Player(Entity):
         That includes the player at this computer.
         """
         super().__init__(field)
+        self.can_walk = True
         self.hp = 100
         self.walk_tick_delay = 15
         zoom = lambda img, factor: pygame.transform.scale(img, (
@@ -162,7 +181,7 @@ class Player(Entity):
             self.hp = data['player_info']['hp']
             self.direction = data['player_info']['direction']
             self.effects = [effects.get_effect(i) for i in data['player_info']['effects']]
-            self.field.inventory.items = [inventory.get_item(i) for i in data['player_info']['inventory']]
+            self.field.inventory.items = [inventory.get_item(i, self.field.inventory) for i in data['player_info']['inventory']]
         except:
             traceback.print_exc()
 
@@ -225,6 +244,8 @@ class Player(Entity):
             angle = math.acos(cosa) * 180 / math.pi
             if self.transmit:
                 connection.client.action('action', angle)
+        elif button==1:
+            connection.client.action('hit')
 
     def on_unclick(self, pos, button):
         pass
